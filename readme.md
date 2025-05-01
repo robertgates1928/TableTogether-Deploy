@@ -53,3 +53,7 @@ Apply automated fixes with:
 ```sh
 npm run lint:css:fix
 ```
+
+## Git LFS
+
+Git LFS is used to track binary files.
