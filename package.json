@@ -1,0 +1,45 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@duckdb/node-api": "^1.2.1-alpha.16",
+    "@mojojs/core": "^1.26.10",
+    "radashi": "^12.4.0"
+  },
+  "devDependencies": {
+    "@types/busboy": "^1.5.0",
+    "@types/js-yaml": "^4.0.3",
+    "@types/mime-types": "^2.1.0",
+    "@types/node": "^22.5.0",
+    "@types/nopt": "^3.0.29",
+    "@types/react": "^19.0.0",
+    "@types/stack-utils": "^2.0.1",
+    "@types/tough-cookie": "^4.0.2",
+    "@types/ws": "^8.5.3",
+    "eslint": "^9.25.1",
+    "nodemon": "^3.0.0",
+    "npm-run-all2": "^7.0.2",
+    "stylelint": "^16.19.1",
+    "stylelint-config-standard": "^38.0.0",
+    "tap": "^21.0.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.31.1"
+  },
+  "scripts": {
+    "build": "tsc --build ./",
+    "build:test": "npm-run-all build test",
+    "build:test:dev": "npm-run-all build test dev",
+    "build:dev": "npm-run-all build dev",
+    "build:watch": "npm run build -- --watch",
+    "dev": "nodemon lib/index.js server",
+    "start": "NODE_ENV=production node lib/index.js server -l http://*:8080",
+    "test": "tap run test",
+    "initDev": "npm run build && node lib/index.js initDev",
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:css:fix": "stylelint --fix \"**/*.css\"",
+    "lint:ts": "eslint",
+    "lint:ts:fix": "eslint --fix",
+    "lint:all": "npm-run-all --continue-on-error lint:ts lint:css",
+    "lint:all:fix": "npm-run-all --continue-on-error lint:ts:fix lint:css:fix",
+    "duckdb:ui": "npm run build && node lib/index.js duckui"
+  }
+}
