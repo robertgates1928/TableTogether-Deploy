@@ -1,7 +1,7 @@
 import { MojoApp } from '@mojojs/core';
 import { DuckDBInstance } from '@duckdb/node-api';
 import { app } from '../lib/index.js';
-import { CoolCats, CatRecord } from '../lib/models/cats.js';
+import { UserRecord } from '../lib/models/users.js';
 import t from 'tap';
 
 import * as path from 'path';
@@ -24,7 +24,7 @@ t.test('User Model', async t => {
         t.ok(fs.existsSync(catPath), "CSV import is reachable on the filesystem.");
         await t.resolves(() => app.models.users.loadUsersFromCsv(connection, catPath).catch(e => console.error("Failure in loadUsersFromCsv", e)), `Import users from '${ catPath }' OK`);
 
-        const cats: CatRecord[] = await app.models.users.listUsers(connection).catch(e => console.error("Failure in listCats", e));
+        const cats: UserRecord[] = await app.models.users.listUsers(connection).catch(e => console.error("Failure in listCats", e));
 
         t.ok(cats.length > 0, "Listing cats returns results for populated database.")
 

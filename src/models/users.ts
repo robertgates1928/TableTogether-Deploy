@@ -3,7 +3,7 @@ import { get, zipToObject, omit } from "radashi"
 
 // "id", "privateName", "privateEmail", "privateAge", "password", "profileName", "hubMemberships"
 
-interface NewUser {
+export interface NewUser {
     privateName: string,
     privateEmail: string,
     privateAge: number,
@@ -12,7 +12,7 @@ interface NewUser {
     hubMemberships: string[],
 }
 
-interface UserRecord {
+export interface UserRecord {
     id: number,
     privateName: string,
     privateEmail: string,
