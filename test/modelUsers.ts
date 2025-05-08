@@ -13,6 +13,7 @@ app.models.database.connectionString = ':memory:';
 
 t.test('User Model', async t => {
 
+    // Test load and list
     await app.models.database.connection(async connection => {
         
         await t.resolves(() => app.models.users.init(connection), "Users init OK");
@@ -27,5 +28,10 @@ t.test('User Model', async t => {
         t.ok(users.length > 0, "Listing users returns results for populated database.")
 
     })
+
+    // Query by email
+    const email = "jane.lin@test.com";
+    const user = await app.models.database.run(c => app.models.users.userWithEmail(c, email));
+    t.same(user.privateEmail, email, "User email matches query.");
 
 });

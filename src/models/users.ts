@@ -77,24 +77,38 @@ export class Users {
             .map(row => rowToClass(
                 row,
                 'id',
-                'private_name',
-                'private_email',
-                'private_age',
-                'profile_name',
-                'hub_memberships'
+                'privateName',
+                'privateEmail',
+                'privateAge',
+                'profileName',
+                'hubMemberships'
             )
         ))
     }
 
-    // async updateProfileImage(connection: DuckDBConnection, cat: CatRecord) {
-    //     await connection.prepare(`
-    //         UPDATE cat_profiles SET profile_image_asset = $2 WHERE cat_id = $1
-    //     `)
-    //         .then(statement => {
-    //             statement.bind([cat.catId, cat.profileImage]);
-    //             return statement.run()
-    //         })
-    // }
+    async userWithEmail(connection: DuckDBConnection, email: string): Promise<UserRecord> {
+        return connection.runAndReadAll(`
+            SELECT 
+                user_id,
+                private_name,
+                private_email,
+                private_age,
+                profile_name,
+                hub_memberships
+            FROM 
+                users
+            WHERE private_email = $1`
+        , [email]
+        ).then(result => rowToClass(result.getRows()[0],
+                'id',
+                'privateName',
+                'privateEmail',
+                'privateAge',
+                'profileName',
+                'hubMemberships'
+            )
+        )
+    }
 
     async newUser(db: DuckDBConnection, user: NewUser): Promise<UserRecord> {
         const insert = await db.prepare(`
