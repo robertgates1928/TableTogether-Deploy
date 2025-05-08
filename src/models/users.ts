@@ -1,5 +1,6 @@
 import { DuckDBConnection, DuckDBValue } from "@duckdb/node-api";
 import { get, zipToObject, omit } from "radashi"
+import { Nullable } from "tough-cookie";
 
 // "id", "privateName", "privateEmail", "privateAge", "password", "profileName", "hubMemberships"
 
@@ -23,6 +24,8 @@ export interface UserRecord {
 
 // Model class for interacting with the cats
 export class Users {
+
+    constructor(private salt: string) { }
 
     // Run first to make sure the table is in good shape
     async init(connection: DuckDBConnection) {
@@ -56,10 +59,10 @@ export class Users {
                 private_name,
                 private_email,
                 private_age,
-                hash(password) as password,
+                hash(concat(password, ?)) as password,
                 profile_name,
                 hub_memberships  FROM '${csvPath}';
-            `)
+            `, [this.salt])
     }
 
     async listUsers(connection: DuckDBConnection): Promise<UserRecord[]> {
@@ -86,7 +89,7 @@ export class Users {
         ))
     }
 
-    async userWithEmail(connection: DuckDBConnection, email: string): Promise<UserRecord> {
+    async userWithEmail(connection: DuckDBConnection, email: string): Promise<Nullable<UserRecord>> {
         return connection.runAndReadAll(`
             SELECT 
                 user_id,
@@ -99,7 +102,8 @@ export class Users {
                 users
             WHERE private_email = $1`
         , [email]
-        ).then(result => rowToClass(result.getRows()[0],
+        ).then(result => result.getRows().length > 0 
+            ? rowToClass(result.getRows()[0],
                 'id',
                 'privateName',
                 'privateEmail',
@@ -107,18 +111,47 @@ export class Users {
                 'profileName',
                 'hubMemberships'
             )
+            : null
+        )
+    }
+
+    async userWithCredentials(connection: DuckDBConnection, email: string, password: string): Promise<Nullable<UserRecord>> {
+        return connection.runAndReadAll(`
+            SELECT 
+                user_id,
+                private_name,
+                private_email,
+                private_age,
+                profile_name,
+                hub_memberships
+            FROM 
+                users
+            WHERE private_email = $1 AND password = hash(concat($2, $3))`
+        , [email, password, this.salt]
+        ).then(result => result.getRows().length > 0 
+            ? rowToClass(result.getRows()[0],
+                'id',
+                'privateName',
+                'privateEmail',
+                'privateAge',
+                'profileName',
+                'hubMemberships'
+            )
+            : null
         )
     }
 
     async newUser(db: DuckDBConnection, user: NewUser): Promise<UserRecord> {
         const insert = await db.prepare(`
                 INSERT INTO users (private_name, private_email, private_age, password, profile_name, hub_memberships)
-                VALUES (?, ?, ?, ?, hash(?), ?, ?)
+                VALUES (?, ?, ?, ?, hash(concat(?, ?)), ?, ?)
                 RETURNING (user_id);
             `);
 
         // Bind happy path values in bulk
         const values = ["privateName", "privateEmail", "privateAge", "password", "profileName", "hubMemberships"].map(k => get(user, k) as DuckDBValue);
+        // Add the salt after the password
+        values.splice(4, 0, this.salt);
         insert.bind(values);
 
         // Go!
@@ -133,6 +166,12 @@ export class Users {
         return omit(userRecord, ["password"])
     }
 
+    async updatePassword(db: DuckDBConnection, userId: number, newPassword: string) {
+        await db.run(
+            `UPDATE users SET password = hash(concat($2, $3)) WHERE user_id = $1`,
+            [userId, newPassword, this.salt]
+        )
+    }
 }
 
 // Return an object from a row by associating the values to the given keys. The object's type can be inferred by the calling context or provided as a generic parameter.

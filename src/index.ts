@@ -18,7 +18,7 @@ app.secrets = app.config.secrets;
 // model registration
 
 app.models.database = new Database(app.config.database);
-app.models.users = new Users();
+app.models.users = new Users(app.config.salt);
 
 // Routing
 app.get('/').to('example#welcome');
@@ -29,14 +29,18 @@ app.start();
 
 // function for generating a valid configuration file if one is missing
 function createDefaultConfig() {
-    const passwordOptions = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$^&*()/?".split('')
-    let secret = '';
-    for (let i = 0; i < 16; i++) {
-        secret += passwordOptions[Math.floor(Math.random() * passwordOptions.length)];
+    const passwordGen = () => {
+        const passwordOptions = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$^&*()/?".split('')
+        let secret = '';
+        for (let i = 0; i < 16; i++) {
+            secret += passwordOptions[Math.floor(Math.random() * passwordOptions.length)];
+        }
+        return secret
     }
 
     fs.writeFileSync('config.yml', `---
     secrets:
-        - ${ secret }
+        - ${ passwordGen() }
+    salt: ${ passwordGen() }
     database: "hub.db"`)
 }

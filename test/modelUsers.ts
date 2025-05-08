@@ -31,7 +31,30 @@ t.test('User Model', async t => {
 
     // Query by email
     const email = "jane.lin@test.com";
-    const user = await app.models.database.run(c => app.models.users.userWithEmail(c, email));
-    t.same(user.privateEmail, email, "User email matches query.");
+    const userJane = await app.models.database.run(c => app.models.users.userWithEmail(c, email));
+    t.same(userJane.privateEmail, email, "User email matches query.");
+
+    // Check password
+    const importPassword = 'zIUJCUFTspUo';
+    {
+        const user = await app.models.database.run(c => app.models.users.userWithCredentials(c, email, importPassword));
+        t.same(user.privateEmail, email, "User email matches credential query.");
+    }
+
+    // Check password failure (unchanged password)
+    const newPassword = 'paswrod123';
+    {
+        const user = await app.models.database.run(c => app.models.users.userWithCredentials(c, email, newPassword));
+        t.same(user, null, "User fails credential query.");
+    }
+
+    // Change Password
+    {
+        const user = await app.models.database.run(
+            c => app.models.users.updatePassword(c, userJane.id, newPassword)
+                .then(() => app.models.users.userWithCredentials(c, email, newPassword))
+        );
+        t.same(user.email, userJane.email, "User logs in with updated password.");
+    }
 
 });
