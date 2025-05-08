@@ -1,5 +1,3 @@
-import { MojoApp } from '@mojojs/core';
-import { DuckDBInstance } from '@duckdb/node-api';
 import { app } from '../lib/index.js';
 import { UserRecord } from '../lib/models/users.js';
 import t from 'tap';
@@ -17,21 +15,16 @@ t.test('User Model', async t => {
 
     await app.models.database.connection(async connection => {
         
-        await t.resolves(() => app.models.users.init(connection), "Cats init OK");
+        await t.resolves(() => app.models.users.init(connection), "Users init OK");
         
-        const catPath = path.resolve('test_data/users.csv');
-        console.info(`Importing test users from ${catPath}`);
-        t.ok(fs.existsSync(catPath), "CSV import is reachable on the filesystem.");
-        await t.resolves(() => app.models.users.loadUsersFromCsv(connection, catPath).catch(e => console.error("Failure in loadUsersFromCsv", e)), `Import users from '${ catPath }' OK`);
+        const userPath = path.resolve('test_data/users.csv');
+        console.info(`Importing test users from ${userPath}`);
+        t.ok(fs.existsSync(userPath), "CSV import is reachable on the filesystem.");
+        await t.resolves(() => app.models.users.loadUsersFromCsv(connection, userPath).catch(e => console.error("Failure in loadUsersFromCsv", e)), `Import users from '${ userPath }' OK`);
 
-        const cats: UserRecord[] = await app.models.users.listUsers(connection).catch(e => console.error("Failure in listCats", e));
+        const users: UserRecord[] = await app.models.users.listUsers(connection).catch(e => console.error("Failure in listUsers", e));
 
-        t.ok(cats.length > 0, "Listing cats returns results for populated database.")
-
-        // cats[0].profileImage = '1.jpg';
-        // await t.resolves(app.models.users.updateProfileImage(connection, cats[0]).catch(e => console.error("Failure in updateProfileImage", e)), "Test updating a profile image")
-
-        // t.match((await app.models.users.listUsers(connection).catch(e => console.error("Failure in listUsers", e)))[0].profileImage, cats[0].profileImage, "Update cat profile images")
+        t.ok(users.length > 0, "Listing users returns results for populated database.")
 
     })
 

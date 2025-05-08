@@ -1,5 +1,5 @@
 import { DuckDBConnection } from "@duckdb/node-api";
-import { MojoApp, UserAgent } from "@mojojs/core";
+import { MojoApp } from "@mojojs/core";
 
 export default async function initDev(app: MojoApp, args: string[]) {
     await app.models.database.connection(async (connection: DuckDBConnection) => {
