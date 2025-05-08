@@ -47,4 +47,21 @@ export class Database {
         this.connections.delete(connectionKey);
     }
 
+    // A convenance function for when you only need to run a query and return the result
+    async run<T>(dbFunc: (connection: DuckDBConnection) => Promise<T>): Promise<T> {
+        const connection = await this.database().then( db => db.connect() );
+        // Add to connections registry
+        const connectionKey = ++this.connectionCounter;
+        this.connections.set(connectionKey, connection);
+
+        const result = await dbFunc(connection);
+
+        await connection.close()
+        
+        // remove from connections registry
+        this.connections.delete(connectionKey);
+
+        return result
+    }
+
 }
