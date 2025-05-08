@@ -4,6 +4,8 @@ config.yml
 
 tools
 *.db
+# DB lock files
+*.wal
 
 ### Node ###
 # Logs
