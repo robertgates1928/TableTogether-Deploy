@@ -57,3 +57,7 @@ npm run lint:css:fix
 ## Git LFS
 
 Git LFS is used to track binary files.
+
+### Is git LFS working?
+
+Check `test_data/lfs-image-test.png` if you see an image of some cats, it's working! Remember that GitHub Desktop is separate to any git instance you can see on the command line, so if you aren't confident setting up the command line git, use github desktop for checking in commits and pulling from the remote.
