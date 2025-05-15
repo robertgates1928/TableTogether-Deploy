@@ -1,0 +1,22 @@
+Table users {
+    user_id INTEGER [primary key]
+    private_name VARCHAR [NOT NULL]
+    private_email VARCHAR [NOT NULL, UNIQUE]
+    private_age INTEGER [NOT NULL]
+    password UBIGINT [NOT NULL]
+    profile_name VARCHAR [NOT NULL]
+}
+
+table hubs {
+    hub_id INTEGER [primary key]
+    hub_name VARCHAR [NOT NULL, UNIQUE]
+    hub_domain VARCHAR [NOT NULL]
+}
+
+table hub_memberships {
+    user_id INTEGER
+    hub_id INTEGER
+}
+
+ref: hub_memberships.hub_id > hubs.hub_id
+ref: hub_memberships.user_id > users.user_id
