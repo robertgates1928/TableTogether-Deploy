@@ -68,49 +68,34 @@ export class Users {
     async listUsers(connection: DuckDBConnection): Promise<UserRecord[]> {
         return connection.runAndReadAll(`
             SELECT 
-                user_id,
-                private_name,
-                private_email,
-                private_age,
-                profile_name,
-                hub_memberships
+                user_id as id,
+                private_name as privateName,
+                private_email as privateEmail,
+                private_age as privateAge,
+                profile_name as profileName,
+                hub_memberships as hubMemberships
             FROM 
                 users;
         `).then(result => result.getRows()
-            .map(row => rowToClass(
-                row,
-                'id',
-                'privateName',
-                'privateEmail',
-                'privateAge',
-                'profileName',
-                'hubMemberships'
-            )
+            .map(row => rowToClass( row, ...result.columnNames() )
         ))
     }
 
     async userWithEmail(connection: DuckDBConnection, email: string): Promise<Nullable<UserRecord>> {
         return connection.runAndReadAll(`
             SELECT 
-                user_id,
-                private_name,
-                private_email,
-                private_age,
-                profile_name,
-                hub_memberships
+                user_id as id,
+                private_name as privateName,
+                private_email as privateEmail,
+                private_age as privateAge,
+                profile_name as profileName,
+                hub_memberships as hubMemberships
             FROM 
                 users
             WHERE private_email = $1`
         , [email]
         ).then(result => result.getRows().length > 0 
-            ? rowToClass(result.getRows()[0],
-                'id',
-                'privateName',
-                'privateEmail',
-                'privateAge',
-                'profileName',
-                'hubMemberships'
-            )
+            ? rowToClass( result.getRows()[0], ...result.columnNames() )
             : null
         )
     }
