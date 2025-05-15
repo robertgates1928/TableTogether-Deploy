@@ -13,7 +13,7 @@ export class Database {
         // Setup sigterm behavior
         process.on('SIGINT', async () => {
             console.log("Closing database...");
-            await Promise.all( this.connections.values().map(c => c.close()) );
+            await Promise.all( this.connections.values().map(c => c.closeSync()) );
             process.exit();
         });
     }
@@ -41,7 +41,7 @@ export class Database {
         await closure(connection);
 
         
-        await connection.close()
+        await connection.closeSync()
         
         // remove from connections registry
         this.connections.delete(connectionKey);
@@ -56,7 +56,7 @@ export class Database {
 
         const result = await dbFunc(connection);
 
-        await connection.close()
+        await connection.closeSync()
         
         // remove from connections registry
         this.connections.delete(connectionKey);
