@@ -1,4 +1,4 @@
-import mojo, { yamlConfigPlugin } from '@mojojs/core';
+import mojo, { MojoApp, yamlConfigPlugin } from '@mojojs/core';
 
 import { Database } from './models/database.js';
 import { Users } from './models/users.js';
@@ -9,7 +9,7 @@ import fs from 'fs';
 if (!fs.existsSync('config.yml')) createDefaultConfig();
 
 // Mojo App
-export const app = mojo();
+export const app: MojoApp = mojo();
 
 app.plugin(yamlConfigPlugin);
 app.secrets = app.config.secrets;
