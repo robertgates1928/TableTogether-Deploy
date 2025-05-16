@@ -44,6 +44,7 @@ export class Users {
             );`);
     }
 
+    // Use this method to load data for testing or demonstration
     async loadUsersFromCsv(connection: DuckDBConnection, csvPath: string) {
         // const importFromCSV = await connection.prepare(`
         //     INSERT INTO cat_profiles
@@ -61,9 +62,10 @@ export class Users {
                 private_age,
                 hash(concat(password, ?)) as password,
                 profile_name,
-                hub_memberships  FROM '${csvPath}';
+                hub_memberships FROM '${csvPath}';
             `, [this.salt])
     }
+
 
     async listUsers(connection: DuckDBConnection): Promise<UserRecord[]> {
         return connection.runAndReadAll(`
@@ -103,25 +105,18 @@ export class Users {
     async userWithCredentials(connection: DuckDBConnection, email: string, password: string): Promise<Nullable<UserRecord>> {
         return connection.runAndReadAll(`
             SELECT 
-                user_id,
-                private_name,
-                private_email,
-                private_age,
-                profile_name,
-                hub_memberships
+                user_id as id,
+                private_name as privateName,
+                private_email as privateEmail,
+                private_age as privateAge,
+                profile_name as profileName,
+                hub_memberships as hubMemberships
             FROM 
                 users
             WHERE private_email = $1 AND password = hash(concat($2, $3))`
         , [email, password, this.salt]
         ).then(result => result.getRows().length > 0 
-            ? rowToClass(result.getRows()[0],
-                'id',
-                'privateName',
-                'privateEmail',
-                'privateAge',
-                'profileName',
-                'hubMemberships'
-            )
+            ? rowToClass(result.getRows()[0], ...result.columnNames())
             : null
         )
     }
