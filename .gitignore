@@ -2,6 +2,8 @@
 lib
 config.yml
 
+test_temp
+
 tools
 *.db
 # DB lock files
