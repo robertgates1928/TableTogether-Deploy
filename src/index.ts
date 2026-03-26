@@ -30,6 +30,7 @@ app.start();
 // function for generating a valid configuration file if one is missing
 function createDefaultConfig() {
     const passwordGen = () => {
+        // This is a stand in for a password generator. This is generating the key used to encrypt the sessions handed out to users.
         const passwordOptions = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$^&*()/?".split('')
         let secret = '';
         for (let i = 0; i < 16; i++) {
@@ -38,6 +39,9 @@ function createDefaultConfig() {
         return secret
     }
 
+    // Just using text formatting to layout the simple yaml file
+    // This is ok for atomic values, but is problematic if you try to include a datastructure
+    // Any keys added here can be accesses by app.config.secrets
     fs.writeFileSync('config.yml', `---
     secrets:
         - ${ passwordGen() }
