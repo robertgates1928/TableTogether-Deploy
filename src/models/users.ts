@@ -18,11 +18,8 @@ export class Users {
 
     constructor(db: Database) {
         this.db = db
-    }
 
-    // Run first to make sure the table is in good shape
-    init() {
-        // Auto increment from 1
+        // Init code
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY AUTO INC,

@@ -1,6 +1,6 @@
 import mojo, { MojoApp, yamlConfigPlugin } from '@mojojs/core';
 
-import { Database } from './models/database.js';
+import Database from "better-sqlite3";
 import { Users } from './models/users.js';
 
 import fs from 'fs';
@@ -14,11 +14,11 @@ export const app: MojoApp = mojo();
 app.plugin(yamlConfigPlugin);
 app.secrets = app.config.secrets;
 
+// DB Connect
+const db = new Database(app.config.dat)
 
 // model registration
-
-app.models.database = new Database(app.config.database);
-app.models.users = new Users(app.config.salt);
+app.models.users = new Users(db);
 
 // Routing
 app.get('/').to('example#welcome');
@@ -45,6 +45,5 @@ function createDefaultConfig() {
     fs.writeFileSync('config.yml', `---
     secrets:
         - ${ passwordGen() }
-    salt: ${ passwordGen() }
     database: "hub.db"`)
 }
