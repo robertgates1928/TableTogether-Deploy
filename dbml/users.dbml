@@ -1,16 +1,12 @@
 Table users {
     user_id INTEGER [primary key]
-    private_name VARCHAR [NOT NULL]
-    private_email VARCHAR [NOT NULL, UNIQUE]
-    private_age INTEGER [NOT NULL]
-    password UBIGINT [NOT NULL]
-    profile_name VARCHAR [NOT NULL]
+    profile_name TEXT [NOT NULL]
 }
 
 table hubs {
     hub_id INTEGER [primary key]
-    hub_name VARCHAR [NOT NULL, UNIQUE]
-    hub_domain VARCHAR [NOT NULL]
+    hub_name TEXT [NOT NULL, UNIQUE]
+    hub_domain TEXT [NOT NULL]
 }
 
 table hub_memberships {
