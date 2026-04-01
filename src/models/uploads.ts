@@ -58,6 +58,28 @@ export class Uploads {
         `).all(userId) as UploadRecord[];
     }
 
+    // Delete an upload by ID, scoped to the owning user for safety
+    deleteUpload(uploadId: number | bigint, userId: number | bigint): boolean {
+        const result = this.db.prepare(`
+            DELETE FROM uploads WHERE upload_id = ? AND user_id = ?
+        `).run(uploadId, userId);
+        return result.changes > 0;
+    }
+
+    // Get a single upload by ID
+    getUpload(uploadId: number | bigint): UploadRecord | undefined {
+        return this.db.prepare(`
+            SELECT
+                upload_id as id,
+                user_id as userId,
+                file_name as fileName,
+                file_ext as fileExt,
+                saved_path as savedPath
+            FROM uploads
+            WHERE upload_id = ?
+        `).get(uploadId) as UploadRecord | undefined;
+    }
+
     // List all uploads across all users
     listAllUploads(): UploadRecord[] {
         return this.db.prepare(`

@@ -64,6 +64,7 @@ app.get('/uploads/#filename', async (ctx) => {
 // Demo routes — reference examples for students
 app.get('/demo/upload').to('demo#uploadPage');
 app.post('/demo/upload').to('demo#uploadAction');
+app.delete('/demo/upload/:id').to('demo#deleteUpload');
 
 app.start();
 

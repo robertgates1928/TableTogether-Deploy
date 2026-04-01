@@ -54,5 +54,23 @@ t.test('Uploads Model (SQLite)', async t => {
         t.same(forOther[0].fileName, 'doc.pdf', 'Correct file for the second user');
     });
 
+    await t.test('deleteUpload removes the record', async t => {
+        // Delete Uploader's own upload
+        const ownUploads = uploads.listUploadsForUser(user.id);
+        const totalBefore = uploads.listAllUploads().length;
+        const deleted = uploads.deleteUpload(ownUploads[0].id, user.id);
+        t.ok(deleted, 'Delete returned true');
+        t.equal(uploads.listAllUploads().length, totalBefore - 1, 'One fewer upload after delete');
+    });
+
+    await t.test('deleteUpload rejects wrong user', async t => {
+        // Try to delete SomeoneElse's upload using a different user
+        const intruder = users.newUser({ profileName: 'Intruder' });
+        const remaining = uploads.listAllUploads();
+        const deleted = uploads.deleteUpload(remaining[0].id, intruder.id);
+        t.notOk(deleted, 'Delete returned false for wrong user');
+        t.equal(uploads.listAllUploads().length, remaining.length, 'Upload count unchanged');
+    });
+
     db.close();
 });

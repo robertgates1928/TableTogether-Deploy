@@ -26,9 +26,14 @@
 <h3>Your Uploads</h3>
 <ul id="upload-list">
     <% for (const upload of ctx.stash.uploads) { %>
-    <li>
+    <li id="upload-<%= upload.id %>">
         <a href="/<%= upload.savedPath %>"><%= upload.fileName %></a>
         (<%= upload.fileExt %>)
+        <%# hx-delete sends a DELETE request; hx-swap="outerHTML" with an empty response removes the row %>
+        <button hx-delete="/demo/upload/<%= upload.id %>"
+                hx-target="#upload-<%= upload.id %>"
+                hx-swap="outerHTML"
+                hx-confirm="Delete this file?">×</button>
     </li>
     <% } %>
 </ul>

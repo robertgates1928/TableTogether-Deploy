@@ -53,6 +53,22 @@ await t.test('File upload via /demo/upload', async t => {
         (await ua.getOk(`/uploads/${files[0]}`)).statusIs(200);
     });
 
+    // Delete an upload via htmx DELETE
+    await t.test('upload page shows delete buttons', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(200).bodyLike(/hx-delete/);
+    });
+
+    await t.test('deleting an upload via htmx succeeds', async () => {
+        // Use upload ID 1 (first upload created in this test session)
+        (await ua.deleteOk('/demo/upload/1', {
+            headers: { 'HX-Request': 'true' }
+        })).statusIs(200);
+    });
+
+    await t.test('deleted upload no longer appears on the page', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(200).bodyUnlike(/upload-1"/);
+    });
+
     // Directory traversal should not expose files outside of uploads/
     await t.test('directory traversal with ../ is blocked', async () => {
         (await ua.getOk('/uploads/..%2Fpackage.json')).statusIs(404);

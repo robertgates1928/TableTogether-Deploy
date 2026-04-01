@@ -1,4 +1,8 @@
-<li>
+<li id="upload-<%= ctx.stash.upload.id %>">
     <a href="/<%= ctx.stash.upload.savedPath %>"><%= ctx.stash.upload.fileName %></a>
     (<%= ctx.stash.upload.fileExt %>)
+    <button hx-delete="/demo/upload/<%= ctx.stash.upload.id %>"
+            hx-target="#upload-<%= ctx.stash.upload.id %>"
+            hx-swap="outerHTML"
+            hx-confirm="Delete this file?">×</button>
 </li>
