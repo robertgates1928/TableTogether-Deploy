@@ -1,7 +1,4 @@
-import { Database } from "better-sqlite3"
-import { Nullable } from "tough-cookie";
-
-// "id", "privateName", "privateEmail", "privateAge", "password", "profileName", "hubMemberships"
+import Database from "better-sqlite3";
 
 export interface NewUser {
     profileName: string,
@@ -12,32 +9,32 @@ export interface UserRecord {
     profileName: string
 }
 
-// Model class for interacting with the cats
+// Model class for interacting with users
 export class Users {
-    db: Database
+    db: Database.Database
 
-    constructor(db: Database) {
+    constructor(db: Database.Database) {
         this.db = db
 
         // Init code
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS users (
-                user_id INTEGER PRIMARY KEY AUTO INC,
-                profile_name TEXT NOT NULL UNIQUE
+                user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                profile_name TEXT NOT NULL
             );`);
     }
 
     listUsers(): UserRecord[] {
         return this.db.prepare(`
             SELECT 
-                user_id as id
+                user_id as id,
                 profile_name as profileName
             FROM 
                 users;
         `).all() as UserRecord[]
     }
 
-    userWithId(id: number): Nullable<UserRecord> {
+    userWithId(id: number): UserRecord | undefined {
         return this.db.prepare(`
             SELECT 
                 user_id as id,
@@ -45,7 +42,7 @@ export class Users {
             FROM 
                 users
             WHERE user_id = ?`)
-            .get(id) as Nullable<UserRecord>
+            .get(id) as UserRecord | undefined
     }
 
     newUser(user: NewUser): UserRecord {

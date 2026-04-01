@@ -31,7 +31,7 @@
     "start": "NODE_ENV=production node lib/index.js server -l http://*:8080",
     "test": "tap --disable-coverage --allow-empty-coverage test/*.js test/*.ts",
     "test:coverage": "tap test/*.js test/*.ts",
-    "initDev": "npm run build && node lib/index.js initDev",
+    "seed": "npm run build && node lib/seed.js",
     "lint:css": "stylelint \"**/*.css\"",
     "lint:css:fix": "stylelint --fix \"**/*.css\"",
     "lint:ts": "eslint",

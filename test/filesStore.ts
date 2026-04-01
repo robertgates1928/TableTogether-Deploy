@@ -1,17 +1,16 @@
 import { app } from '../lib/index.js';
 import t from 'tap';
-import { saveFiles, FileSet } from '../lib/fileStore.js';
+import { saveFiles, SavedFile } from '../lib/fileStore.js';
 import { existsSync, readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { first, last } from "radashi";
-import { Nullable } from 'tough-cookie';
 
 app.log.level = 'debug';
 
 const testPath = path.join('test_temp', "fileStore");
 
-const uploadMeta: FileSet[][] = [];
+const uploadMeta: SavedFile[][] = [];
 
 app.post('/upload', async (ctx) => {
     const files = await saveFiles(ctx, testPath);
@@ -21,6 +20,9 @@ app.post('/upload', async (ctx) => {
 
 await t.test('Upload testing', async t => {
     const ua = await app.newTestUserAgent({ tap: t });
+
+    // Authenticate first so the auth hook doesn't redirect uploads
+    await ua.postOk('/login', { formData: { action: 'create', profileName: 'UploadTester' } });
 
     const cleanUpTasks: Promise<void>[] = [];
     {
@@ -36,7 +38,7 @@ await t.test('Upload testing', async t => {
         const fileMeta = last(uploadMeta, []);
 
         if (fileMeta.length > 0) {
-            const testFilePath = orDefault(first(fileMeta)?.destinationPath, testFileName);
+            const testFilePath = orDefault(first(fileMeta)?.savedPath, testFileName);
             t.ok(existsSync(testFilePath), "Text file was created on file system");
             t.same(readFileSync(testFilePath, { encoding: "utf-8" }), testFileContent, "Text file has content transmitted through post request");
             
@@ -65,7 +67,7 @@ await t.test('Upload testing', async t => {
         const fileMeta = last(uploadMeta, []);
 
         if (fileMeta.length > 0) {
-            const testFilePath = orDefault(first(fileMeta)?.destinationPath, testFileName);
+            const testFilePath = orDefault(first(fileMeta)?.savedPath, testFileName);
             t.ok(existsSync(testFilePath), "Binary file was created on file system");
             t.same(readFileSync(testFilePath), testFileContent, "Binary file has content transmitted through post request");
             cleanUpTasks.push(fs.rm(testFilePath));
@@ -81,6 +83,6 @@ await t.test('Upload testing', async t => {
     
 })
 
-function orDefault<T>(val: Nullable<T>, def: T): T {
+function orDefault<T>(val: T | null | undefined, def: T): T {
     return val ?? def
 }

@@ -1,60 +1,47 @@
-import { app } from '../lib/index.js';
-import { UserRecord } from '../lib/models/users.js';
+import Database from 'better-sqlite3';
+import { Users } from '../lib/models/users.js';
 import t from 'tap';
 
-import * as path from 'path';
-import fs from 'fs';
+t.test('User Model (SQLite)', async t => {
+    // Use an in-memory database for test isolation
+    const db = new Database(':memory:');
+    const users = new Users(db);
 
-app.log.level = 'debug';
+    await t.test('listUsers returns empty array for fresh database', async t => {
+        const result = users.listUsers();
+        t.same(result, [], 'No users in a fresh database');
+    });
 
-// Database setup and hooks
-app.config.database = ':memory:'
-app.models.database.connectionString = ':memory:';
+    await t.test('newUser creates a user and returns a record', async t => {
+        const user = users.newUser({ profileName: 'Alice' });
+        t.ok(user.id, 'Created user has an id');
+        t.same(user.profileName, 'Alice', 'Profile name matches');
+    });
 
-t.test('User Model', async t => {
+    await t.test('listUsers returns created users', async t => {
+        const result = users.listUsers();
+        t.equal(result.length, 1, 'One user exists');
+        t.same(result[0].profileName, 'Alice', 'Listed user matches created user');
+    });
 
-    // Test load and list
-    await app.models.database.connection(async connection => {
-        
-        await t.resolves(() => app.models.users.init(connection), "Users init OK");
-        
-        const userPath = path.resolve('test_data/users.csv');
-        console.info(`Importing test users from ${userPath}`);
-        t.ok(fs.existsSync(userPath), "CSV import is reachable on the filesystem.");
-        await t.resolves(() => app.models.users.loadUsersFromCsv(connection, userPath).catch(e => console.error("Failure in loadUsersFromCsv", e)), `Import users from '${ userPath }' OK`);
+    await t.test('userWithId returns the correct user', async t => {
+        const all = users.listUsers();
+        const user = users.userWithId(all[0].id as number);
+        t.ok(user, 'User found by id');
+        t.same(user?.profileName, 'Alice', 'Profile name matches');
+    });
 
-        const users: UserRecord[] = await app.models.users.listUsers(connection).catch(e => console.error("Failure in listUsers", e));
+    await t.test('userWithId returns undefined for non-existent id', async t => {
+        const user = users.userWithId(9999);
+        t.same(user, undefined, 'No user returned for bad id');
+    });
 
-        t.ok(users.length > 0, "Listing users returns results for populated database.")
+    await t.test('multiple users can be created', async t => {
+        users.newUser({ profileName: 'Bob' });
+        users.newUser({ profileName: 'Charlie' });
+        const result = users.listUsers();
+        t.equal(result.length, 3, 'Three users exist');
+    });
 
-    })
-
-    // Query by email
-    const email = "jane.lin@test.com";
-    const userJane = await app.models.database.run(c => app.models.users.userWithEmail(c, email));
-    t.same(userJane.privateEmail, email, "User email matches query.");
-
-    // Check password
-    const importPassword = 'zIUJCUFTspUo';
-    {
-        const user = await app.models.database.run(c => app.models.users.userWithCredentials(c, email, importPassword));
-        t.same(user.privateEmail, email, "User email matches credential query.");
-    }
-
-    // Check password failure (unchanged password)
-    const newPassword = 'paswrod123';
-    {
-        const user = await app.models.database.run(c => app.models.users.userWithCredentials(c, email, newPassword));
-        t.same(user, null, "User fails credential query.");
-    }
-
-    // Change Password
-    {
-        const user = await app.models.database.run(
-            c => app.models.users.updatePassword(c, userJane.id, newPassword)
-                .then(() => app.models.users.userWithCredentials(c, email, newPassword))
-        );
-        t.same(user.email, userJane.email, "User logs in with updated password.");
-    }
-
+    db.close();
 });

@@ -15,15 +15,30 @@ app.plugin(yamlConfigPlugin);
 app.secrets = app.config.secrets;
 
 // DB Connect
-const db = new Database(app.config.dat)
+const db = new Database(app.config.database)
 
 // model registration
 app.models.users = new Users(db);
 
+// Auth hook — redirect unauthenticated users to /login
+// Static assets are served before hooks run, so they are unaffected
+app.addContextHook('dispatch:before', async (ctx) => {
+    const reqPath = ctx.req.path;
+    if (reqPath === '/login') return;
+
+    const session = await ctx.session();
+    if (!session.userId) {
+        await ctx.redirectTo('/login');
+        return false;
+    }
+});
+
 // Routing
+app.get('/login').to('auth#loginPage');
+app.post('/login').to('auth#loginAction');
+app.get('/logout').to('auth#logout');
+
 app.get('/').to('example#welcome');
-
-
 
 app.start();
 

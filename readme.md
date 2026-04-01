@@ -2,21 +2,25 @@
 
 This repository provides a starting foundation for a community hub prototype project. You can fork this project to start your own project. This means you may also be able to pull any updates to the prototype and merge them with your work if needed.
 
-This prototype comes with a list of test users which can be used when testing and developing your project.
+This prototype uses SQLite (via `better-sqlite3`) for data storage. A simple session-based login system lets testers pick an existing user or create a new one.
 
-To set up development and testing data run:
+## Getting Started
+
+Seed the database with a default test user:
 
 ```sh
-npm run initDev
+npm run seed
 ```
+
+Start the development server:
+
+```sh
+npm run build:dev
+```
+
+Visit the app in your browser. You will be redirected to the **login page** where you can select an existing user or create a new one. Use the `/logout` route to switch users.
 
 ## Commands
-
-### Starting DuckDB UI
-
-```sh
-npm run duckdb:ui
-```
 
 ### Linting
 
