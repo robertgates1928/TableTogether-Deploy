@@ -132,6 +132,59 @@ npm run build:test
 - **Auth flow test** (`test/authFlow.ts`) walks through the full login → protected page → logout → redirect cycle using the test user agent. This is a good example of how to test multi-step user flows across pages.
 - **File upload test** (`test/filesStore.ts`) tests the `/demo/upload` route end-to-end: authenticates, uploads files, and verifies they are saved to disk.
 
+## Integrating Your Front-End
+
+If you have an existing HTML/CSS/JS project from an earlier design phase, here's how to bring it into this prototype.
+
+### Static assets
+
+CSS, client-side JavaScript, images, and fonts go in `public/`. They are served directly by the framework without any processing. Reference them in templates with:
+
+```html
+<link rel="stylesheet" href="<%= ctx.urlForFile('your-styles.css') %>">
+<script src="<%= ctx.urlForFile('your-script.js') %>"></script>
+```
+
+Or add them to the shared layout in `views/layouts/default.html.tmpl` so they load on every page.
+
+### Converting static pages to templates
+
+Pages that need dynamic content (showing the logged-in user, data from the database, form handling) should become templates rather than static HTML. To convert a static page:
+
+1. Take the content inside `<body>` from your HTML file
+2. Create a new `.html.tmpl` file in the appropriate `views/` subdirectory
+3. Add `% view.layout = 'default';` at the top to wrap it in the shared layout
+4. Use `<%= %>` tags wherever you need dynamic values
+5. Add a route and controller action in `src/index.ts` to serve it
+
+Pages that don't need any server-side data can stay as static HTML in `public/`.
+
+### Client-side TypeScript
+
+If your front-end uses TypeScript, you'll need a separate compilation step since the existing `tsconfig.json` targets Node.js (server-side). Create a `tsconfig.client.json` in the project root:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "outDir": "public/js",
+    "rootDir": "src/client",
+    "strict": true
+  },
+  "include": ["src/client/**/*"]
+}
+```
+
+Place your browser-side TypeScript in `src/client/`. Then update the build script in `package.json` to compile both:
+
+```json
+"build": "tsc --build ./ && tsc --build tsconfig.client.json"
+```
+
+The compiled JavaScript will appear in `public/js/` and can be included in templates with a `<script>` tag.
+
 ## Database Schema
 
 The database schema is documented in `dbml/schema.dbml`. Keep this file up to date as you add or modify tables.
