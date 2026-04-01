@@ -70,7 +70,7 @@ function createDefaultConfig() {
     // This is ok for atomic values, but is problematic if you try to include a datastructure
     // Any keys added here can be accesses by app.config.secrets
     fs.writeFileSync('config.yml', `---
-    secrets:
-        - ${ passwordGen() }
-    database: "hub.db"`)
+secrets:
+  - ${passwordGen()}
+database: "hub.db"`)
 }

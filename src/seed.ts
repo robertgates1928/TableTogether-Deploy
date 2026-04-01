@@ -3,6 +3,7 @@ import { Users } from "./models/users.js";
 
 // Seed script for setting up development and testing data.
 // Run with: npm run seed
+// NOTE: This path must match the "database" value in config.yml
 
 const DB_PATH = "hub.db";
 
