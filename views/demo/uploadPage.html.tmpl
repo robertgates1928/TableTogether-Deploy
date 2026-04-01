@@ -1,0 +1,14 @@
+% view.layout = 'default';
+% ctx.stash.title = "Upload Demo"
+<h2>File Upload Demo</h2>
+<form method="post" action="/demo/upload" enctype="multipart/form-data">
+    <fieldset>
+        <legend>Upload a File</legend>
+        <label>
+            Choose file:
+            <input type="file" name="file" required>
+        </label>
+        <button type="submit">Upload</button>
+    </fieldset>
+</form>
+<p><a href="/">Back to home</a></p>

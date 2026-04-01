@@ -2,6 +2,7 @@ import mojo, { MojoApp, yamlConfigPlugin } from '@mojojs/core';
 
 import Database from "better-sqlite3";
 import { Users } from './models/users.js';
+import { Uploads } from './models/uploads.js';
 
 import fs from 'fs';
 
@@ -17,8 +18,12 @@ app.secrets = app.config.secrets;
 // DB Connect
 const db = new Database(app.config.database)
 
-// model registration
+// Model registration
 app.models.users = new Users(db);
+app.models.uploads = new Uploads(db);
+
+// Serve uploaded files as static assets
+app.static.publicPaths.push('uploads');
 
 // Auth hook — redirect unauthenticated users to /login
 // Static assets are served before hooks run, so they are unaffected
@@ -31,6 +36,9 @@ app.addContextHook('dispatch:before', async (ctx) => {
         await ctx.redirectTo('/login');
         return false;
     }
+
+    // Make session data available to templates via the stash
+    ctx.stash.profileName = session.profileName;
 });
 
 // Routing
@@ -39,6 +47,10 @@ app.post('/login').to('auth#loginAction');
 app.get('/logout').to('auth#logout');
 
 app.get('/').to('example#welcome');
+
+// Demo routes — reference examples for students
+app.get('/demo/upload').to('demo#uploadPage');
+app.post('/demo/upload').to('demo#uploadAction');
 
 app.start();
 

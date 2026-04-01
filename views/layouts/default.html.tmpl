@@ -10,12 +10,18 @@
 <body>
     <header>
         <h1>Community Hub</h1>
+        <% if (ctx.isSessionActive) { %>
+        <nav>
+            <span>Logged in as <strong><%= ctx.stash.profileName %></strong></span>
+            <a href="/logout">Logout</a>
+        </nav>
+        <% } %>
     </header>
     <main>
         <%= ctx.content.main %>
     </main>
     <footer>
-        <p>&copy; 2025 Bla + Bla Corporation ltd.</p>
+        <p>&copy; 2026 Bla + Bla Corporation ltd.</p>
     </footer>
 </body>
 </html>

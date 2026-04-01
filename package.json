@@ -24,19 +24,19 @@
   "scripts": {
     "build": "tsc --build ./",
     "build:test": "npm-run-all build test",
-    "build:test:dev": "npm-run-all build test dev",
-    "build:dev": "npm-run-all build dev",
-    "build:watch": "npm run build -- --watch",
-    "dev": "nodemon lib/index.js server",
-    "start": "NODE_ENV=production node lib/index.js server -l http://*:8080",
+    "dev": "nodemon",
     "test": "tap --disable-coverage --allow-empty-coverage test/*.js test/*.ts",
-    "test:coverage": "tap test/*.js test/*.ts",
     "seed": "npm run build && node lib/seed.js",
-    "lint:css": "stylelint \"**/*.css\"",
-    "lint:css:fix": "stylelint --fix \"**/*.css\"",
+    "lint": "npm-run-all --continue-on-error lint:ts lint:css",
+    "lint:fix": "npm-run-all --continue-on-error lint:ts:fix lint:css:fix",
     "lint:ts": "eslint",
     "lint:ts:fix": "eslint --fix",
-    "lint:all": "npm-run-all --continue-on-error lint:ts lint:css",
-    "lint:all:fix": "npm-run-all --continue-on-error lint:ts:fix lint:css:fix"
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:css:fix": "stylelint --fix \"**/*.css\""
+  },
+  "nodemonConfig": {
+    "watch": ["src", "views"],
+    "ext": "ts,tmpl,css",
+    "exec": "npm run build && node lib/index.js server"
   }
 }

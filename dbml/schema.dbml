@@ -1,0 +1,14 @@
+Table users {
+    user_id INTEGER [primary key]
+    profile_name TEXT [NOT NULL]
+}
+
+Table uploads {
+    upload_id INTEGER [primary key]
+    user_id INTEGER [NOT NULL]
+    file_name TEXT [NOT NULL]
+    file_ext TEXT [NOT NULL]
+    saved_path TEXT [NOT NULL]
+}
+
+ref: uploads.user_id > users.user_id
