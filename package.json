@@ -1,17 +1,14 @@
 {
   "type": "module",
   "dependencies": {
-    "@duckdb/node-api": "^1.2.1-alpha.16",
     "@mojojs/core": "^1.26.10",
-    "radashi": "^12.4.0"
+    "@types/better-sqlite3": "^7.6.13",
+    "better-sqlite3": "^12.8.0",
+    "htmx.org": "^2.0.8"
   },
   "devDependencies": {
-    "@types/busboy": "^1.5.0",
-    "@types/js-yaml": "^4.0.3",
     "@types/mime-types": "^2.1.0",
     "@types/node": "^22.5.0",
-    "@types/nopt": "^3.0.29",
-    "@types/react": "^19.0.0",
     "@types/stack-utils": "^2.0.1",
     "@types/tough-cookie": "^4.0.2",
     "@types/ws": "^8.5.3",
@@ -27,20 +24,23 @@
   "scripts": {
     "build": "tsc --build ./",
     "build:test": "npm-run-all build test",
-    "build:test:dev": "npm-run-all build test dev",
-    "build:dev": "npm-run-all build dev",
-    "build:watch": "npm run build -- --watch",
-    "dev": "nodemon lib/index.js server",
-    "start": "NODE_ENV=production node lib/index.js server -l http://*:8080",
+    "dev": "nodemon",
     "test": "tap --disable-coverage --allow-empty-coverage test/*.js test/*.ts",
-    "test:coverage": "tap test/*.js test/*.ts",
-    "initDev": "npm run build && node lib/index.js initDev",
-    "lint:css": "stylelint \"**/*.css\"",
-    "lint:css:fix": "stylelint --fix \"**/*.css\"",
+    "seed": "npm run build && node lib/seed.js",
+    "lint": "npm-run-all --continue-on-error lint:ts lint:css",
+    "lint:fix": "npm-run-all --continue-on-error lint:ts:fix lint:css:fix",
     "lint:ts": "eslint",
     "lint:ts:fix": "eslint --fix",
-    "lint:all": "npm-run-all --continue-on-error lint:ts lint:css",
-    "lint:all:fix": "npm-run-all --continue-on-error lint:ts:fix lint:css:fix",
-    "duckdb:ui": "npm run build && node lib/index.js duckui"
+    "lint:css": "stylelint \"**/*.css\"",
+    "lint:css:fix": "stylelint --fix \"**/*.css\"",
+    "postinstall": "node -e \"const fs=require('fs');fs.mkdirSync('public/js',{recursive:true});fs.copyFileSync('node_modules/htmx.org/dist/htmx.min.js','public/js/htmx.min.js')\""
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src",
+      "views"
+    ],
+    "ext": "ts,tmpl,css",
+    "exec": "npm run build && node lib/index.js server"
   }
 }

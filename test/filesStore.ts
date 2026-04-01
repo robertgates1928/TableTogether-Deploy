@@ -1,86 +1,96 @@
 import { app } from '../lib/index.js';
 import t from 'tap';
-import { saveFiles, FileSet } from '../lib/fileStore.js';
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "node:path";
-import { first, last } from "radashi";
-import { Nullable } from 'tough-cookie';
 
 app.log.level = 'debug';
 
-const testPath = path.join('test_temp', "fileStore");
-
-const uploadMeta: FileSet[][] = [];
-
-app.post('/upload', async (ctx) => {
-    const files = await saveFiles(ctx, testPath);
-    uploadMeta.push(files);
-    ctx.render({ json: { files: files } })
-});
-
-await t.test('Upload testing', async t => {
+await t.test('File upload via /demo/upload', async t => {
     const ua = await app.newTestUserAgent({ tap: t });
 
-    const cleanUpTasks: Promise<void>[] = [];
-    {
-        const testFileName = 'test.txt';
-        const testFileContent = 'Hello Mojo!';
+    // Unauthenticated access should be blocked
+    await t.test('upload form requires auth', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(302).headerLike('Location', /\/login/);
+    });
 
-        await t.test('upload text', async () => {
-            (await ua.postOk('/upload', { formData: { fieldA: 'first value', fieldB: 'second value', fieldC: { content: testFileContent, filename: testFileName } } }))
-                .statusIs(200)
-                .typeLike(RegExp("json"))
-        });
+    // Authenticate
+    await ua.postOk('/login', { formData: { action: 'create', profileName: 'UploadTester' } });
 
-        const fileMeta = last(uploadMeta, []);
+    await t.test('upload form is accessible', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(200).bodyLike(/Upload a File/);
+    });
 
-        if (fileMeta.length > 0) {
-            const testFilePath = orDefault(first(fileMeta)?.destinationPath, testFileName);
-            t.ok(existsSync(testFilePath), "Text file was created on file system");
-            t.same(readFileSync(testFilePath, { encoding: "utf-8" }), testFileContent, "Text file has content transmitted through post request");
-            
-            cleanUpTasks.push(fs.rm(testFilePath));
-        }
-        else {
-            t.fail("No files returned from upload action")
-        }
-        
-        
-    }
+    await t.test('uploading a text file succeeds (htmx)', async () => {
+        (await ua.postOk('/demo/upload', {
+            headers: { 'HX-Request': 'true' },
+            formData: { file: { content: 'Hello Mojo!', filename: 'test.txt' } }
+        })).statusIs(200).bodyLike(/test\.txt/);
+    });
 
-    // 
-    // Bin Testing
-    //
-    {
-        const testFileName = 'test_data/lfs-image-test.png';
-        const testFileContent = readFileSync(testFileName);
+    await t.test('uploading a binary file succeeds (htmx)', async () => {
+        (await ua.postOk('/demo/upload', {
+            headers: { 'HX-Request': 'true' },
+            formData: { file: { content: Buffer.from([0x89, 0x50, 0x4e, 0x47]), filename: 'image.png' } }
+        })).statusIs(200).bodyLike(/image\.png/);
+    });
 
-        await t.test('upload binary', async () => {
-            (await ua.postOk('/upload', { formData: { fieldA: 'first value', fieldB: 'second value', fieldC: { content: testFileContent, filename: testFileName } } }))
-                .statusIs(200)
-                .typeLike(RegExp("json"));
-        });
+    await t.test('non-htmx upload redirects back to the form', async () => {
+        (await ua.postOk('/demo/upload', {
+            formData: { file: { content: 'fallback test', filename: 'fallback.txt' } }
+        })).statusIs(302).headerLike('Location', /\/demo\/upload/);
+    });
 
-        const fileMeta = last(uploadMeta, []);
+    // Verify files were written to the uploads directory
+    await t.test('uploaded files exist on disk', async t => {
+        t.ok(existsSync('uploads'), 'uploads directory was created');
+        const files = await fs.readdir('uploads');
+        t.ok(files.length >= 2, 'At least two files were saved');
+    });
 
-        if (fileMeta.length > 0) {
-            const testFilePath = orDefault(first(fileMeta)?.destinationPath, testFileName);
-            t.ok(existsSync(testFilePath), "Binary file was created on file system");
-            t.same(readFileSync(testFilePath), testFileContent, "Binary file has content transmitted through post request");
-            cleanUpTasks.push(fs.rm(testFilePath));
-        }
-        else {
-            t.fail("No files returned from upload action")
-        }
+    // Verify uploaded files are accessible when authenticated
+    await t.test('uploaded file is accessible when logged in', async () => {
+        const files = await fs.readdir('uploads');
+        (await ua.getOk(`/uploads/${files[0]}`)).statusIs(200);
+    });
 
-        
-    }
+    // Delete an upload via htmx DELETE
+    await t.test('upload page shows delete buttons', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(200).bodyLike(/hx-delete/);
+    });
 
-    await Promise.all([ua.stop(), ...cleanUpTasks]);
-    
-})
+    await t.test('deleting an upload via htmx succeeds', async () => {
+        // Use upload ID 1 (first upload created in this test session)
+        (await ua.deleteOk('/demo/upload/1', {
+            headers: { 'HX-Request': 'true' }
+        })).statusIs(200);
+    });
 
-function orDefault<T>(val: Nullable<T>, def: T): T {
-    return val ?? def
-}
+    await t.test('deleted upload no longer appears on the page', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(200).bodyUnlike(/upload-1"/);
+    });
+
+    // Directory traversal should not expose files outside of uploads/
+    await t.test('directory traversal with ../ is blocked', async () => {
+        (await ua.getOk('/uploads/..%2Fpackage.json')).statusIs(404);
+    });
+
+    await t.test('directory traversal with encoded ../ is blocked', async () => {
+        (await ua.getOk('/uploads/%2e%2e%2fpackage.json')).statusIs(404);
+    });
+
+    await t.test('directory traversal with backslash is blocked', async () => {
+        (await ua.getOk('/uploads/..%5Cpackage.json')).statusIs(404);
+    });
+
+    // Verify uploaded files are protected after logout
+    await ua.getOk('/logout');
+    await t.test('uploaded file is blocked after logout', async () => {
+        const files = await fs.readdir('uploads');
+        (await ua.getOk(`/uploads/${files[0]}`)).statusIs(302).headerLike('Location', /\/login/);
+    });
+
+    // Clean up test uploads
+    await fs.rm('uploads', { recursive: true, force: true });
+
+    await ua.stop();
+});

@@ -1,6 +1,8 @@
 ### Project files ###
 lib
 config.yml
+uploads
+public/js
 
 test_temp
 

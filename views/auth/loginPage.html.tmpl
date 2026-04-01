@@ -1,0 +1,33 @@
+% view.layout = 'default';
+% ctx.stash.title = "Login"
+<h2>Choose a Test User</h2>
+
+<% if (users.length > 0) { %>
+<form method="post" action="/login">
+    <input type="hidden" name="action" value="select">
+    <fieldset>
+        <legend>Existing Users</legend>
+        <% for (const user of users) { %>
+        <label>
+            <input type="radio" name="userId" value="<%= user.id %>" required>
+            <%= user.profileName %>
+        </label><br>
+        <% } %>
+        <button type="submit">Login</button>
+    </fieldset>
+</form>
+<% } else { %>
+<p>No users yet. Create one below to get started.</p>
+<% } %>
+
+<form method="post" action="/login">
+    <input type="hidden" name="action" value="create">
+    <fieldset>
+        <legend>Create New User</legend>
+        <label>
+            Profile Name:
+            <input type="text" name="profileName" required>
+        </label>
+        <button type="submit">Create &amp; Login</button>
+    </fieldset>
+</form>
