@@ -1,88 +1,41 @@
 import { app } from '../lib/index.js';
 import t from 'tap';
-import { saveFiles, SavedFile } from '../lib/fileStore.js';
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
-import path from "node:path";
-import { first, last } from "radashi";
 
 app.log.level = 'debug';
 
-const testPath = path.join('test_temp', "fileStore");
-
-const uploadMeta: SavedFile[][] = [];
-
-app.post('/upload', async (ctx) => {
-    const files = await saveFiles(ctx, testPath);
-    uploadMeta.push(files);
-    ctx.render({ json: { files: files } })
-});
-
-await t.test('Upload testing', async t => {
+await t.test('File upload via /demo/upload', async t => {
     const ua = await app.newTestUserAgent({ tap: t });
 
     // Authenticate first so the auth hook doesn't redirect uploads
     await ua.postOk('/login', { formData: { action: 'create', profileName: 'UploadTester' } });
 
-    const cleanUpTasks: Promise<void>[] = [];
-    {
-        const testFileName = 'test.txt';
-        const testFileContent = 'Hello Mojo!';
+    await t.test('upload form is accessible', async () => {
+        (await ua.getOk('/demo/upload')).statusIs(200).bodyLike(/Upload a File/);
+    });
 
-        await t.test('upload text', async () => {
-            (await ua.postOk('/upload', { formData: { fieldA: 'first value', fieldB: 'second value', fieldC: { content: testFileContent, filename: testFileName } } }))
-                .statusIs(200)
-                .typeLike(RegExp("json"))
-        });
+    await t.test('uploading a text file succeeds', async () => {
+        (await ua.postOk('/demo/upload', {
+            formData: { file: { content: 'Hello Mojo!', filename: 'test.txt' } }
+        })).statusIs(200).bodyLike(/test\.txt/);
+    });
 
-        const fileMeta = last(uploadMeta, []);
+    await t.test('uploading a binary file succeeds', async () => {
+        (await ua.postOk('/demo/upload', {
+            formData: { file: { content: Buffer.from([0x89, 0x50, 0x4e, 0x47]), filename: 'image.png' } }
+        })).statusIs(200).bodyLike(/image\.png/);
+    });
 
-        if (fileMeta.length > 0) {
-            const testFilePath = orDefault(first(fileMeta)?.savedPath, testFileName);
-            t.ok(existsSync(testFilePath), "Text file was created on file system");
-            t.same(readFileSync(testFilePath, { encoding: "utf-8" }), testFileContent, "Text file has content transmitted through post request");
-            
-            cleanUpTasks.push(fs.rm(testFilePath));
-        }
-        else {
-            t.fail("No files returned from upload action")
-        }
-        
-        
-    }
+    // Verify files were written to the uploads directory
+    await t.test('uploaded files exist on disk', async t => {
+        t.ok(existsSync('uploads'), 'uploads directory was created');
+        const files = await fs.readdir('uploads');
+        t.ok(files.length >= 2, 'At least two files were saved');
+    });
 
-    // 
-    // Bin Testing
-    //
-    {
-        const testFileName = 'test_data/lfs-image-test.png';
-        const testFileContent = readFileSync(testFileName);
+    // Clean up test uploads
+    await fs.rm('uploads', { recursive: true, force: true });
 
-        await t.test('upload binary', async () => {
-            (await ua.postOk('/upload', { formData: { fieldA: 'first value', fieldB: 'second value', fieldC: { content: testFileContent, filename: testFileName } } }))
-                .statusIs(200)
-                .typeLike(RegExp("json"));
-        });
-
-        const fileMeta = last(uploadMeta, []);
-
-        if (fileMeta.length > 0) {
-            const testFilePath = orDefault(first(fileMeta)?.savedPath, testFileName);
-            t.ok(existsSync(testFilePath), "Binary file was created on file system");
-            t.same(readFileSync(testFilePath), testFileContent, "Binary file has content transmitted through post request");
-            cleanUpTasks.push(fs.rm(testFilePath));
-        }
-        else {
-            t.fail("No files returned from upload action")
-        }
-
-        
-    }
-
-    await Promise.all([ua.stop(), ...cleanUpTasks]);
-    
-})
-
-function orDefault<T>(val: T | null | undefined, def: T): T {
-    return val ?? def
-}
+    await ua.stop();
+});

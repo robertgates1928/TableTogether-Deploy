@@ -3,8 +3,7 @@
   "dependencies": {
     "@mojojs/core": "^1.26.10",
     "@types/better-sqlite3": "^7.6.13",
-    "better-sqlite3": "^12.8.0",
-    "radashi": "^12.4.0"
+    "better-sqlite3": "^12.8.0"
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.0",
@@ -35,7 +34,10 @@
     "lint:css:fix": "stylelint --fix \"**/*.css\""
   },
   "nodemonConfig": {
-    "watch": ["src", "views"],
+    "watch": [
+      "src",
+      "views"
+    ],
     "ext": "ts,tmpl,css",
     "exec": "npm run build && node lib/index.js server"
   }

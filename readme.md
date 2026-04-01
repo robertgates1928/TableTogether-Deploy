@@ -128,9 +128,9 @@ Tests live in `test/` and use [tap](https://node-tap.org/). Run them with:
 npm run build:test
 ```
 
-- **Model tests** (`test/modelUsers.ts`) use an in-memory SQLite database (`:memory:`) for isolation — they don't touch the real database file.
-- **Route tests** (`test/example.ts`) use mojo.js's built-in test user agent to make HTTP requests against the app.
-- **File upload tests** (`test/filesStore.ts`) test the upload pipeline end-to-end.
+- **Model tests** (`test/modelUsers.ts`, `test/modelUploads.ts`) use an in-memory SQLite database (`:memory:`) for isolation — they don't touch the real database file. These are good templates for testing your own models.
+- **Auth flow test** (`test/authFlow.ts`) walks through the full login → protected page → logout → redirect cycle using the test user agent. This is a good example of how to test multi-step user flows across pages.
+- **File upload test** (`test/filesStore.ts`) tests the `/demo/upload` route end-to-end: authenticates, uploads files, and verifies they are saved to disk.
 
 ## Database Schema
 
