@@ -3,7 +3,8 @@
   "dependencies": {
     "@mojojs/core": "^1.26.10",
     "@types/better-sqlite3": "^7.6.13",
-    "better-sqlite3": "^12.8.0"
+    "better-sqlite3": "^12.8.0",
+    "htmx.org": "^2.0.8"
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.0",
@@ -31,7 +32,8 @@
     "lint:ts": "eslint",
     "lint:ts:fix": "eslint --fix",
     "lint:css": "stylelint \"**/*.css\"",
-    "lint:css:fix": "stylelint --fix \"**/*.css\""
+    "lint:css:fix": "stylelint --fix \"**/*.css\"",
+    "postinstall": "node -e \"const fs=require('fs');fs.mkdirSync('public/js',{recursive:true});fs.copyFileSync('node_modules/htmx.org/dist/htmx.min.js','public/js/htmx.min.js')\""
   },
   "nodemonConfig": {
     "watch": [

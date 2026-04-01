@@ -1,7 +1,18 @@
 % view.layout = 'default';
 % ctx.stash.title = "Upload Demo"
 <h2>File Upload Demo</h2>
-<form method="post" action="/demo/upload" enctype="multipart/form-data">
+
+<%# The form uses htmx to submit without a full page reload.
+    hx-post:     POST to this URL via AJAX
+    hx-target:   insert the response into the element matching this selector
+    hx-swap:     how to insert — "afterbegin" prepends to the target
+    hx-encoding: required for file uploads with htmx
+    If htmx is not loaded, the form still works as a normal POST. %>
+<form method="post" action="/demo/upload" enctype="multipart/form-data"
+      hx-post="/demo/upload"
+      hx-target="#upload-list"
+      hx-swap="afterbegin"
+      hx-encoding="multipart/form-data">
     <fieldset>
         <legend>Upload a File</legend>
         <label>
@@ -11,4 +22,15 @@
         <button type="submit">Upload</button>
     </fieldset>
 </form>
+
+<h3>Your Uploads</h3>
+<ul id="upload-list">
+    <% for (const upload of ctx.stash.uploads) { %>
+    <li>
+        <a href="/<%= upload.savedPath %>"><%= upload.fileName %></a>
+        (<%= upload.fileExt %>)
+    </li>
+    <% } %>
+</ul>
+
 <p><a href="/">Back to home</a></p>

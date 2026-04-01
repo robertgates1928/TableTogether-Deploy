@@ -5,6 +5,7 @@ import { Users } from './models/users.js';
 import { Uploads } from './models/uploads.js';
 
 import fs from 'fs';
+import path from 'node:path';
 
 // Fill in empty config if missing
 if (!fs.existsSync('config.yml')) createDefaultConfig();
@@ -22,14 +23,12 @@ const db = new Database(app.config.database)
 app.models.users = new Users(db);
 app.models.uploads = new Uploads(db);
 
-// Serve uploaded files as static assets
-app.static.publicPaths.push('uploads');
-
 // Auth hook — redirect unauthenticated users to /login
-// Static assets are served before hooks run, so they are unaffected
+// Skip the login page and static assets served from public/ (file extension but not a routed path)
 app.addContextHook('dispatch:before', async (ctx) => {
     const reqPath = ctx.req.path;
     if (reqPath === '/login') return;
+    if (/\.\w+$/.test(reqPath) && !reqPath.startsWith('/uploads/')) return;
 
     const session = await ctx.session();
     if (!session.userId) {
@@ -47,6 +46,20 @@ app.post('/login').to('auth#loginAction');
 app.get('/logout').to('auth#logout');
 
 app.get('/').to('example#welcome');
+
+// Serve uploaded files from the uploads/ directory
+// Use # (relaxed placeholder) so filenames with dots are matched
+app.get('/uploads/#filename', async (ctx) => {
+    if (ctx.res.isSent) return;
+
+    // Reject any filename containing path traversal characters
+    const filename = ctx.stash.filename;
+    if (filename !== path.basename(filename) || filename.includes('..')) {
+        return ctx.render({ status: 404, text: 'Not found' });
+    }
+
+    await ctx.sendFile(ctx.home.child('uploads', filename));
+});
 
 // Demo routes — reference examples for students
 app.get('/demo/upload').to('demo#uploadPage');

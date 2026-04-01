@@ -105,8 +105,31 @@ Files are renamed with a UUID to prevent collisions. See the demo upload page fo
 
 - **Controller:** `src/controllers/demo.ts` — saves the file to disk and inserts a record into the `uploads` table
 - **Form template:** `views/demo/uploadPage.html.tmpl` — a `multipart/form-data` form with a file input
-- **Result template:** `views/demo/uploadAction.html.tmpl` — displays the saved file's metadata
+- **Partial template:** `views/demo/_uploadRow.html.tmpl` — HTML fragment returned to htmx requests
 - **Route:** `GET /demo/upload` and `POST /demo/upload` (defined in `src/index.ts`)
+
+### htmx
+
+[htmx](https://htmx.org/) is included and loaded on every page. It lets you make AJAX requests, swap page content, and handle events directly from HTML attributes — no client-side JavaScript required.
+
+The demo upload page shows the core pattern:
+
+```html
+<form method="post" action="/demo/upload" enctype="multipart/form-data"
+      hx-post="/demo/upload"
+      hx-target="#upload-list"
+      hx-swap="afterbegin"
+      hx-encoding="multipart/form-data">
+```
+
+- `hx-post` — submit via AJAX instead of a full page reload
+- `hx-target` — where to put the response (`#upload-list`)
+- `hx-swap` — how to insert it (`afterbegin` prepends to the target)
+- `hx-encoding` — required for file uploads
+
+On the server side, the controller checks for the `HX-Request` header. If present, it returns just an HTML fragment (no layout). If not (e.g. JavaScript is disabled), it falls back to a standard redirect. See `src/controllers/demo.ts` for the full pattern.
+
+For more, see the [htmx documentation](https://htmx.org/docs/).
 
 ## Commands
 
