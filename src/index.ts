@@ -3,6 +3,7 @@ import mojo, { MojoApp, yamlConfigPlugin } from '@mojojs/core';
 import Database from "better-sqlite3";
 import { Users } from './models/users.js';
 import { Uploads } from './models/uploads.js';
+import { Meetups } from './models/meetups.js';
 
 import fs from 'fs';
 import path from 'node:path';
@@ -22,6 +23,7 @@ const db = new Database(app.config.database)
 // Model registration
 app.models.users = new Users(db);
 app.models.uploads = new Uploads(db);
+app.models.meetups = new Meetups(db);
 
 // Auth hook — redirect unauthenticated users to /login
 // Skip the login page and static assets served from public/ (file extension but not a routed path)
@@ -45,7 +47,7 @@ app.get('/login').to('auth#loginPage');
 app.post('/login').to('auth#loginAction');
 app.get('/logout').to('auth#logout');
 
-app.get('/').to('example#welcome');
+app.get('/').to('home#index');
 
 // Serve uploaded files from the uploads/ directory
 // Use # (relaxed placeholder) so filenames with dots are matched

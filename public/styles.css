@@ -1,72 +1,297 @@
+:root {
+    color-scheme: light;
+
+    --bg: #fffaf5;
+    --surface: #fff;
+    --surface-strong: #fff1e4;
+    --text: #1e2230;
+    --muted: #596074;
+    --border: #dfd7cf;
+    --primary: #ca5a34;
+    --primary-strong: #a84422;
+    --accent: #ffe2cc;
+    --shadow: 0 18px 50px rgb(37 23 11 / 10%);
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+    background:
+        radial-gradient(circle at top, rgb(255 232 214 / 90%), transparent 30%),
+        var(--bg);
+    color: var(--text);
 }
 
-h2 {
-    margin-bottom: 3rem;
-    margin-top: 2rem;
+a {
+    color: var(--primary-strong);
 }
 
-/* Indent paragraphs directly after a heading */
-h1 + p,
-h2 + p,
-h3 + p,
-h4 + p,
-h5 + p,
-h6 + p {
-    text-indent: 2em;
+a:hover {
+    color: var(--primary);
 }
 
-/* Card Container */
-.tiled {
-    display: flex;
-    flex-flow: row wrap;
-    gap: 20px; /* Adjust the gap between cards as needed */
-}
-
-/* Cards */
-.card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgb(0 0 0 / 10%);
-    max-width: 300px; /* Adjust the width as needed */
-}
-
-.card img {
+img {
+    display: block;
     max-width: 100%;
-    border-radius: 50%;
 }
 
-.card-body {
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+    background: rgb(255 250 245 / 92%);
+    border-bottom: 1px solid rgb(223 215 207 / 80%);
+}
+
+.header-shell,
+.page-shell,
+.site-footer {
+    width: min(1120px, calc(100% - 2rem));
+    margin: 0 auto;
+}
+
+.header-shell {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
+    gap: 1rem;
+    padding: 1rem 0;
 }
 
-.card-body h5 {
-    margin: 10px 0;
-}
-
-.card-body p {
-    margin: 5px 0;
-}
-
-.card-body a {
-    margin-top: 10px;
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    color: inherit;
     text-decoration: none;
-    color: #007bff;
-    border: 1px solid #007bff;
-    padding: 5px 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s;
 }
 
-.card-body a:hover {
-    background-color: #007bff;
+.brand-mark {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #ed8d5d);
     color: #fff;
+    font-weight: 700;
+}
+
+.brand-name,
+.brand-tagline,
+.eyebrow,
+.supporting-text,
+.empty-state p {
+    margin: 0;
+}
+
+.brand-name {
+    font-weight: 700;
+}
+
+.brand-tagline,
+.site-nav,
+.supporting-text {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.page-shell {
+    padding: 2rem 0 4rem;
+}
+
+.hero,
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.hero {
+    padding: 3rem;
+}
+
+.hero-copy {
+    max-width: 44rem;
+}
+
+.hero-copy h2,
+.panel-header h3,
+.meetup-card-body h4,
+.empty-state-title {
+    margin: 0 0 0.75rem;
+    line-height: 1.15;
+}
+
+.hero-copy h2 {
+    font-size: clamp(2.4rem, 5vw, 4.4rem);
+    letter-spacing: -0.03em;
+}
+
+.hero-copy > p {
+    max-width: 40rem;
+    margin: 0;
+    font-size: 1.08rem;
+    color: var(--muted);
+}
+
+.eyebrow {
+    margin-bottom: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--primary-strong);
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 1.5rem;
+}
+
+.button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 2.9rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.button-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.button-secondary {
+    border-color: var(--border);
+    background: #fff;
+}
+
+.button[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.82;
+}
+
+a:focus-visible,
+button:focus-visible,
+.button:focus-visible {
+    outline: 3px solid #0f62fe;
+    outline-offset: 3px;
+}
+
+.panel {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+}
+
+.panel-accent {
+    background: linear-gradient(180deg, var(--surface-strong), #fff);
+}
+
+.panel-header {
+    margin-bottom: 1rem;
+}
+
+.safety-list {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.safety-list li + li {
+    margin-top: 0.7rem;
+}
+
+.supporting-text {
+    margin-top: 1rem;
+}
+
+.empty-state {
+    padding: 2rem;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    background: #fffdfa;
+}
+
+.empty-state-title {
+    font-size: 1.25rem;
+}
+
+.meetup-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.meetup-card {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: #fff;
+}
+
+.meetup-card img {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.meetup-card-body {
+    padding: 1rem;
+}
+
+.meetup-card-body p {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+}
+
+.site-footer {
+    padding: 0 0 2rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+@media (width <= 720px) {
+    .header-shell,
+    .site-nav {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .hero {
+        padding: 1.5rem;
+    }
+
+    .panel {
+        padding: 1.25rem;
+    }
+
+    .page-shell {
+        width: min(1120px, calc(100% - 1rem));
+    }
 }

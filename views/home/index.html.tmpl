@@ -1,0 +1,59 @@
+% view.layout = 'default';
+% const meetups = ctx.stash.meetups ?? [];
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">TableTogether</p>
+        <h2>Plan small restaurant meetups with clear expectations.</h2>
+        <p>
+            Create public dining plans, share practical details, and help people join with confidence.
+        </p>
+        <div class="hero-actions">
+            <span class="button button-primary" aria-disabled="true">Create a meetup coming soon</span>
+            <a class="button button-secondary" href="#safety-guidelines">Read safety guidelines</a>
+        </div>
+    </div>
+</section>
+
+<section class="panel panel-accent" id="safety-guidelines" aria-labelledby="safety-title">
+    <div class="panel-header">
+        <p class="eyebrow">Responsible Implementation</p>
+        <h3 id="safety-title">Safety Guidelines</h3>
+    </div>
+    <ul class="safety-list">
+        <li>Meet only in public venues such as restaurants, cafes, or food courts.</li>
+        <li>Do not share private home addresses, banking details, or other sensitive personal data.</li>
+        <li>Tell a friend where you are going and leave the meetup if you feel uncomfortable.</li>
+        <li>Respect self-declared identity, consent, and personal boundaries at every step.</li>
+    </ul>
+    <p class="supporting-text">
+        This app uses an essential session cookie to keep signed-in users authenticated across the hub.
+    </p>
+</section>
+
+<section class="panel" aria-labelledby="meetups-title">
+    <div class="panel-header">
+        <p class="eyebrow">Community Feed</p>
+        <h3 id="meetups-title">Current meetups</h3>
+    </div>
+
+    <% if (meetups.length === 0) { %>
+        <div class="empty-state">
+            <p class="empty-state-title">No meetups are live yet.</p>
+            <p>New dining plans will appear here once community members start posting them.</p>
+        </div>
+    <% } else { %>
+        <div class="meetup-grid">
+            <% for (const meetup of meetups) { %>
+                <article class="meetup-card">
+                    <img src="<%= meetup.photoUrl %>" alt="Organizer photo for <%= meetup.restaurantName %>">
+                    <div class="meetup-card-body">
+                        <h4><%= meetup.restaurantName %></h4>
+                        <p><strong>Time:</strong> <%= meetup.meetupTime %></p>
+                        <p><strong>Seats:</strong> <%= meetup.totalSeats %></p>
+                        <p><strong>Payment:</strong> <%= meetup.paymentMode %></p>
+                    </div>
+                </article>
+            <% } %>
+        </div>
+    <% } %>
+</section>

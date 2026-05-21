@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %></title>
+    <title><%= ctx.stash.title ?? 'TableTogether' %></title>
     <link rel="stylesheet" href="<%= ctx.urlForFile('styles.css') %>">
     <link rel="stylesheet" href="<%= ctx.urlForFile('bla-bla-anim.css') %>">
     <script src="<%= ctx.urlForFile('js/htmx.min.js') %>" defer></script>
 </head>
 <body>
-    <header>
-        <h1>Community Hub</h1>
-        <% if (ctx.isSessionActive) { %>
-        <nav>
-            <span>Logged in as <strong><%= ctx.stash.profileName %></strong></span>
-            <a href="/logout">Logout</a>
-        </nav>
-        <% } %>
+    <header class="site-header">
+        <div class="header-shell">
+            <a class="brand" href="/">
+                <span class="brand-mark">TT</span>
+                <div>
+                    <p class="brand-name">TableTogether</p>
+                    <p class="brand-tagline">Restaurant meetup hub</p>
+                </div>
+            </a>
+            <% if (ctx.isSessionActive) { %>
+                <nav class="site-nav" aria-label="Primary">
+                    <span>Signed in as <strong><%= ctx.stash.profileName %></strong></span>
+                    <a href="/logout">Log out</a>
+                </nav>
+            <% } %>
+        </div>
     </header>
-    <main>
+    <main class="page-shell">
         <%= ctx.content.main %>
     </main>
-    <footer>
-        <p>&copy; 2026 Bla + Bla Corporation ltd.</p>
+    <footer class="site-footer">
+        <p>Built on the BlaBla community hub prototype for DECO2017.</p>
     </footer>
 </body>
 </html>
