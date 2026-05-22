@@ -16,7 +16,8 @@ t.test('Home page', async t => {
             .bodyLike(/Safety Guidelines/)
             .bodyLike(/Signed in as/)
             .bodyLike(/HomeTester/)
-            .bodyLike(/No meetups are live yet\./);
+            .bodyLike(/Current meetups/)
+            .bodyLike(/Create a meetup/);
     });
 
     await ua.stop();

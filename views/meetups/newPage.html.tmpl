@@ -1,0 +1,95 @@
+% view.layout = 'default';
+% const values = ctx.stash.values;
+% const errors = ctx.stash.errors ?? [];
+<section class="panel form-shell" aria-labelledby="create-meetup-title">
+    <div class="panel-header">
+        <p class="eyebrow">Create Meetup</p>
+        <h2 id="create-meetup-title">Plan a restaurant meetup</h2>
+        <p class="supporting-text">
+            Share only the practical details people need to decide whether they want to join.
+        </p>
+    </div>
+
+    <% if (errors.length > 0) { %>
+        <section class="error-panel" aria-labelledby="form-errors-title">
+            <h3 id="form-errors-title">Please fix the following issues</h3>
+            <ul>
+                <% for (const error of errors) { %>
+                    <li><%= error %></li>
+                <% } %>
+            </ul>
+        </section>
+    <% } %>
+
+    <form class="meetup-form" method="post" action="/meetups">
+        <div class="form-grid">
+            <label class="field">
+                <span>Restaurant name</span>
+                <input type="text" name="restaurantName" maxlength="80" required value="<%= values.restaurantName %>">
+            </label>
+
+            <label class="field">
+                <span>Meetup time</span>
+                <input type="datetime-local" name="meetupTime" required value="<%= values.meetupTime %>">
+            </label>
+
+            <label class="field field-full">
+                <span>Organizer photo URL</span>
+                <input type="url" name="photoUrl" inputmode="url" required placeholder="https://example.com/photo.jpg" value="<%= values.photoUrl %>">
+            </label>
+
+            <label class="field">
+                <span>Organizer gender</span>
+                <select name="organizerGender" required>
+                    <% for (const option of ctx.stash.genderOptions) { %>
+                        <option value="<%= option %>" <%= values.organizerGender === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+
+            <label class="field">
+                <span>Preferred participant gender</span>
+                <select name="participantGenderPreference" required>
+                    <% for (const option of ctx.stash.preferenceOptions) { %>
+                        <option value="<%= option %>" <%= values.participantGenderPreference === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+
+            <label class="field">
+                <span>Total seats</span>
+                <input type="number" name="totalSeats" min="2" max="12" required value="<%= values.totalSeats %>">
+            </label>
+
+            <label class="field">
+                <span>Payment mode</span>
+                <select name="paymentMode" required>
+                    <% for (const option of ctx.stash.paymentOptions) { %>
+                        <option value="<%= option %>" <%= values.paymentMode === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+
+            <label class="field field-full">
+                <span>Notes</span>
+                <textarea name="notes" rows="4" maxlength="300" placeholder="Example: Quiet dinner, happy to split dishes, close to the station."><%= values.notes %></textarea>
+            </label>
+        </div>
+
+        <section class="panel panel-accent compact-panel" aria-labelledby="safety-confirmation-title">
+            <h3 id="safety-confirmation-title">Safety confirmation</h3>
+            <p class="supporting-text">
+                Meet only in public venues and avoid sharing private contact details or home addresses.
+            </p>
+            <label class="checkbox-field">
+                <input type="checkbox" name="safetyAcknowledged" <%= values.safetyAcknowledged ? 'checked' : '' %>>
+                <span>I agree to follow the safety guidelines and arrange meetings only in public venues.</span>
+            </label>
+        </section>
+
+        <div class="form-actions">
+            <button class="button button-primary" type="submit">Create meetup</button>
+            <a class="button button-secondary" href="/">Cancel</a>
+        </div>
+    </form>
+</section>

@@ -20,6 +20,7 @@
             </a>
             <% if (ctx.isSessionActive) { %>
                 <nav class="site-nav" aria-label="Primary">
+                    <a href="/meetups/new">Create meetup</a>
                     <span>Signed in as <strong><%= ctx.stash.profileName %></strong></span>
                     <a href="/logout">Log out</a>
                 </nav>
