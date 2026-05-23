@@ -50,6 +50,7 @@ app.get('/logout').to('auth#logout');
 app.get('/').to('home#index');
 app.get('/meetups/new').to('meetups#newPage');
 app.post('/meetups').to('meetups#create');
+app.get('/meetups/:id').to('meetups#detailPage');
 
 // Serve uploaded files from the uploads/ directory
 // Use # (relaxed placeholder) so filenames with dots are matched

@@ -1,0 +1,69 @@
+% view.layout = 'default';
+% const meetup = ctx.stash.meetup;
+% const prettyTime = new Date(meetup.meetupTime).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
+<section class="detail-grid">
+    <article class="panel detail-card">
+        <img class="detail-photo" src="<%= meetup.photoUrl %>" alt="Organizer photo for <%= meetup.restaurantName %>">
+        <div class="detail-copy">
+            <p class="eyebrow">Meetup details</p>
+            <h2><%= meetup.restaurantName %></h2>
+            <p class="detail-lead">A small dining plan with clear expectations before everyone joins.</p>
+
+            <% if (ctx.stash.isOwner) { %>
+                <p class="detail-badge">You created this meetup.</p>
+            <% } %>
+
+            <dl class="detail-meta">
+                <div>
+                    <dt>Time</dt>
+                    <dd><%= prettyTime %></dd>
+                </div>
+                <div>
+                    <dt>Total seats</dt>
+                    <dd><%= meetup.totalSeats %></dd>
+                </div>
+                <div>
+                    <dt>Payment mode</dt>
+                    <dd><%= meetup.paymentMode %></dd>
+                </div>
+                <div>
+                    <dt>Organizer gender</dt>
+                    <dd><%= meetup.organizerGender %></dd>
+                </div>
+                <div>
+                    <dt>Preferred participant gender</dt>
+                    <dd><%= meetup.participantGenderPreference %></dd>
+                </div>
+                <div>
+                    <dt>Safety confirmation</dt>
+                    <dd><%= meetup.safetyAcknowledged ? 'Accepted' : 'Not accepted' %></dd>
+                </div>
+            </dl>
+        </div>
+    </article>
+
+    <aside class="panel">
+        <div class="panel-header">
+            <p class="eyebrow">Notes</p>
+            <h3>What to expect</h3>
+        </div>
+        <p class="detail-notes">
+            <%= meetup.notes.length > 0 ? meetup.notes : 'No extra notes were added for this meetup.' %>
+        </p>
+
+        <div class="panel-header detail-side-header">
+            <p class="eyebrow">Next steps</p>
+            <h3>Before joining</h3>
+        </div>
+        <ul class="safety-list">
+            <li>Confirm that the venue is public and easy to find.</li>
+            <li>Review the organizer's preferences and payment expectations.</li>
+            <li>Only continue if the plan feels respectful and safe to you.</li>
+        </ul>
+
+        <div class="form-actions">
+            <a class="button button-primary" href="/">Back to all meetups</a>
+            <a class="button button-secondary" href="/meetups/new">Create another meetup</a>
+        </div>
+    </aside>
+</section>

@@ -24,6 +24,23 @@ export default class Controller {
         await ctx.render();
     }
 
+    async detailPage(ctx: MojoContext): Promise<void> {
+        const meetupsModel = ctx.models.meetups as Meetups;
+        const meetupId = Number(ctx.stash.id);
+        const meetup = meetupsModel.meetupWithId(meetupId);
+
+        if (!meetup) {
+            await ctx.render({ status: 404, text: 'Meetup not found.' });
+            return;
+        }
+
+        const session = await ctx.session();
+        ctx.stash.title = meetup.restaurantName;
+        ctx.stash.meetup = meetup;
+        ctx.stash.isOwner = meetup.organizerUserId === session.userId;
+        await ctx.render({ view: 'meetups/detailPage' });
+    }
+
     async create(ctx: MojoContext): Promise<void> {
         const params = await ctx.params();
         const values = this.readValues(params);
@@ -50,8 +67,8 @@ export default class Controller {
             safetyAcknowledged: values.safetyAcknowledged
         };
 
-        meetupsModel.newMeetup(meetup);
-        await ctx.redirectTo('/');
+        const createdMeetup = meetupsModel.newMeetup(meetup);
+        await ctx.redirectTo(`/meetups/${createdMeetup.id}`);
     }
 
     private stashForm(ctx: MojoContext, values: MeetupFormValues, errors: string[]): void {

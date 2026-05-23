@@ -1,5 +1,6 @@
 % view.layout = 'default';
 % const meetups = ctx.stash.meetups ?? [];
+% const formatTime = (value) => new Date(value).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
 <section class="hero">
     <div class="hero-copy">
         <p class="eyebrow">TableTogether</p>
@@ -48,9 +49,12 @@
                     <img src="<%= meetup.photoUrl %>" alt="Organizer photo for <%= meetup.restaurantName %>">
                     <div class="meetup-card-body">
                         <h4><%= meetup.restaurantName %></h4>
-                        <p><strong>Time:</strong> <%= meetup.meetupTime %></p>
+                        <p><strong>Time:</strong> <%= formatTime(meetup.meetupTime) %></p>
                         <p><strong>Seats:</strong> <%= meetup.totalSeats %></p>
+                        <p><strong>Preference:</strong> <%= meetup.participantGenderPreference %></p>
                         <p><strong>Payment:</strong> <%= meetup.paymentMode %></p>
+                        <p><strong>Notes:</strong> <%= meetup.notes.length > 0 ? meetup.notes : 'No extra notes yet.' %></p>
+                        <a class="text-link" href="/meetups/<%= meetup.id %>">View details</a>
                     </div>
                 </article>
             <% } %>

@@ -33,12 +33,13 @@ t.test('Meetup creation flow', async t => {
 
         response
             .statusIs(302)
-            .headerLike('Location', /\/$/);
+            .headerLike('Location', /\/meetups\/\d+$/);
 
         (await ua.getOk('/'))
             .statusIs(200)
             .bodyLike(/Lantern Kitchen/)
-            .bodyLike(/Split bill/);
+            .bodyLike(/Split bill/)
+            .bodyLike(/View details/);
     });
 
     await t.test('Invalid photo URL is rejected with a validation error', async t => {
