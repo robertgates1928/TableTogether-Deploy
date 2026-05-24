@@ -14,10 +14,13 @@ t.test('Home page', async t => {
             .statusIs(200)
             .bodyLike(/TableTogether/)
             .bodyLike(/Safety Guidelines/)
+            .bodyLike(/Filter current meetups/)
+            .bodyLike(/Community Standards/)
             .bodyLike(/Signed in as/)
             .bodyLike(/HomeTester/)
             .bodyLike(/Current meetups/)
-            .bodyLike(/Create a meetup/);
+            .bodyLike(/Create a meetup/)
+            .bodyLike(/active filters/);
     });
 
     await ua.stop();

@@ -28,7 +28,9 @@ t.test('Meetup details flow', async t => {
     });
 
     const meetupsModel = app.models.meetups as Meetups;
-    const detailPath = `/meetups/${meetupsModel.listMeetups()[0].id}`;
+    const createdMeetup = meetupsModel.listMeetups().find(meetup => meetup.restaurantName === 'Detail Diner');
+    t.ok(createdMeetup, 'Created meetup can be found by restaurant name');
+    const detailPath = `/meetups/${createdMeetup!.id}`;
 
     await t.test('Home page cards link to a detail page', async () => {
         (await ua.getOk('/'))

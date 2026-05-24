@@ -54,6 +54,7 @@
                         <option value="<%= option %>" <%= values.participantGenderPreference === option ? 'selected' : '' %>><%= option %></option>
                     <% } %>
                 </select>
+                <small class="field-help">Use this only to set expectations. It is self-declared, optional in spirit, and not verified by the app.</small>
             </label>
 
             <label class="field">
@@ -81,6 +82,11 @@
             <p class="supporting-text">
                 Meet only in public venues and avoid sharing private contact details or home addresses.
             </p>
+            <ul class="safety-list compact-list">
+                <li>List a real public venue that first-time guests can find easily.</li>
+                <li>Do not ask guests to move to a private address or private payment request before meeting.</li>
+                <li>Use respectful language when describing preferences or boundaries.</li>
+            </ul>
             <label class="checkbox-field">
                 <input type="checkbox" name="safetyAcknowledged" <%= values.safetyAcknowledged ? 'checked' : '' %>>
                 <span>I agree to follow the safety guidelines and arrange meetings only in public venues.</span>

@@ -1,5 +1,6 @@
 % view.layout = 'default';
 % const meetups = ctx.stash.meetups ?? [];
+% const filters = ctx.stash.filters ?? {};
 % const formatTime = (value) => new Date(value).toLocaleString('en-AU', { dateStyle: 'medium', timeStyle: 'short' });
 <section class="hero">
     <div class="hero-copy">
@@ -31,6 +32,70 @@
     </p>
 </section>
 
+<section class="panel" aria-labelledby="filters-title">
+    <div class="panel-header">
+        <p class="eyebrow">Find Your Fit</p>
+        <h3 id="filters-title">Filter current meetups</h3>
+        <p class="supporting-text">
+            Filters are optional and rely on self-declared information. They help reduce surprises, but they do not verify identity or compatibility.
+        </p>
+    </div>
+    <form class="filter-form" method="get" action="/">
+        <div class="filter-grid">
+            <label class="field">
+                <span>Payment mode</span>
+                <select name="paymentMode">
+                    <% for (const option of ctx.stash.paymentOptions) { %>
+                        <option value="<%= option %>" <%= filters.paymentMode === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+            <label class="field">
+                <span>Availability</span>
+                <select name="availability">
+                    <% for (const option of ctx.stash.availabilityOptions) { %>
+                        <option value="<%= option %>" <%= filters.availability === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+            <label class="field">
+                <span>Preferred participant gender</span>
+                <select name="preference">
+                    <% for (const option of ctx.stash.preferenceOptions) { %>
+                        <option value="<%= option %>" <%= filters.preference === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+            <label class="field">
+                <span>Time window</span>
+                <select name="timeWindow">
+                    <% for (const option of ctx.stash.timeOptions) { %>
+                        <option value="<%= option %>" <%= filters.timeWindow === option ? 'selected' : '' %>><%= option %></option>
+                    <% } %>
+                </select>
+            </label>
+        </div>
+        <div class="filter-actions">
+            <button class="button button-primary" type="submit">Apply filters</button>
+            <a class="button button-secondary" href="/">Clear filters</a>
+            <p class="filter-summary"><strong><%= ctx.stash.activeFilterCount %></strong> active filters</p>
+        </div>
+    </form>
+</section>
+
+<section class="panel panel-accent" aria-labelledby="standards-title">
+    <div class="panel-header">
+        <p class="eyebrow">Community Standards</p>
+        <h3 id="standards-title">Before you join</h3>
+    </div>
+    <ul class="safety-list">
+        <li>Treat gender preferences as optional planning information, not a guarantee or entitlement.</li>
+        <li>Keep all first meetings in public venues that already appear in the meetup details.</li>
+        <li>Do not pressure others to move the conversation off-platform before trust is established.</li>
+        <li>Report unsafe or disrespectful behaviour through your course reflection and testing notes.</li>
+    </ul>
+</section>
+
 <section class="panel" aria-labelledby="meetups-title">
     <div class="panel-header">
         <p class="eyebrow">Community Feed</p>
@@ -39,8 +104,13 @@
 
     <% if (meetups.length === 0) { %>
         <div class="empty-state">
-            <p class="empty-state-title">No meetups are live yet.</p>
-            <p>New dining plans will appear here once community members start posting them.</p>
+            <% if (ctx.stash.activeFilterCount > 0) { %>
+                <p class="empty-state-title">No meetups match these filters.</p>
+                <p>Try widening the time window or clearing one of the active filters.</p>
+            <% } else { %>
+                <p class="empty-state-title">No meetups are live yet.</p>
+                <p>New dining plans will appear here once community members start posting them.</p>
+            <% } %>
         </div>
     <% } else { %>
         <div class="meetup-grid">
@@ -51,6 +121,7 @@
                         <h4><%= meetup.restaurantName %></h4>
                         <p><strong>Time:</strong> <%= formatTime(meetup.meetupTime) %></p>
                         <p><strong>Seats:</strong> <%= meetup.totalSeats %></p>
+                        <p><strong>Open spots:</strong> <%= meetup.openSpots %></p>
                         <p><strong>Preference:</strong> <%= meetup.participantGenderPreference %></p>
                         <p><strong>Payment:</strong> <%= meetup.paymentMode %></p>
                         <p><strong>Notes:</strong> <%= meetup.notes.length > 0 ? meetup.notes : 'No extra notes yet.' %></p>

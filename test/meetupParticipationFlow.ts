@@ -32,7 +32,9 @@ t.test('Meetup participation flow', async t => {
     });
 
     const meetupsModel = app.models.meetups as Meetups;
-    const meetupId = meetupsModel.listMeetups()[0].id;
+    const createdMeetup = meetupsModel.listMeetups().find(meetup => meetup.restaurantName === 'Join Test Grill');
+    t.ok(createdMeetup, 'Created meetup can be found by restaurant name');
+    const meetupId = createdMeetup!.id;
     const detailPath = `/meetups/${meetupId}`;
 
     await guestUa.postOk('/login', { formData: { action: 'create', profileName: 'GuestUser' } });

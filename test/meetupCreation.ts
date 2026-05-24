@@ -13,7 +13,9 @@ t.test('Meetup creation flow', async t => {
         (await ua.getOk('/meetups/new'))
             .statusIs(200)
             .bodyLike(/Plan a restaurant meetup/)
-            .bodyLike(/Safety confirmation/);
+            .bodyLike(/Safety confirmation/)
+            .bodyLike(/self-declared, optional in spirit, and not verified by the app/i)
+            .bodyLike(/List a real public venue that first-time guests can find easily\./);
     });
 
     await t.test('Submitting a valid meetup creates a record and redirects home', async () => {
