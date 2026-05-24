@@ -1,6 +1,8 @@
 import type { MojoContext } from '@mojojs/core';
 
 import { Meetups, NewMeetup } from '../models/meetups.js';
+import { MeetupParticipants } from '../models/meetupParticipants.js';
+import { Users } from '../models/users.js';
 
 const GENDER_OPTIONS = ['Woman', 'Man', 'Non-binary', 'Prefer not to say'] as const;
 const PREFERENCE_OPTIONS = ['No preference', ...GENDER_OPTIONS] as const;
@@ -18,6 +20,17 @@ interface MeetupFormValues {
     safetyAcknowledged: boolean;
 }
 
+interface DetailContext {
+    meetup: NonNullable<ReturnType<Meetups['meetupWithId']>>;
+    organizerName: string;
+    participants: ReturnType<MeetupParticipants['listParticipantsForMeetup']>;
+    participantCount: number;
+    spotsLeft: number;
+    isOwner: boolean;
+    isParticipant: boolean;
+    canJoin: boolean;
+}
+
 export default class Controller {
     async newPage(ctx: MojoContext): Promise<void> {
         this.stashForm(ctx, this.defaultValues(), []);
@@ -25,20 +38,73 @@ export default class Controller {
     }
 
     async detailPage(ctx: MojoContext): Promise<void> {
-        const meetupsModel = ctx.models.meetups as Meetups;
         const meetupId = Number(ctx.stash.id);
-        const meetup = meetupsModel.meetupWithId(meetupId);
-
-        if (!meetup) {
+        const detail = await this.getDetailContext(ctx, meetupId);
+        if (!detail) {
             await ctx.render({ status: 404, text: 'Meetup not found.' });
             return;
         }
 
-        const session = await ctx.session();
-        ctx.stash.title = meetup.restaurantName;
-        ctx.stash.meetup = meetup;
-        ctx.stash.isOwner = meetup.organizerUserId === session.userId;
+        this.stashDetail(ctx, detail);
         await ctx.render({ view: 'meetups/detailPage' });
+    }
+
+    async joinAction(ctx: MojoContext): Promise<void> {
+        const meetupId = Number(ctx.stash.id);
+        const detail = await this.getDetailContext(ctx, meetupId);
+        if (!detail) {
+            await ctx.render({ status: 404, text: 'Meetup not found.' });
+            return;
+        }
+
+        if (detail.isOwner) {
+            this.stashDetail(ctx, detail, 'You already hold the organizer spot for this meetup.');
+            await ctx.render({ view: 'meetups/detailPage', status: 400 });
+            return;
+        }
+
+        if (detail.isParticipant) {
+            this.stashDetail(ctx, detail, 'You have already joined this meetup.');
+            await ctx.render({ view: 'meetups/detailPage', status: 400 });
+            return;
+        }
+
+        if (detail.spotsLeft <= 0) {
+            this.stashDetail(ctx, detail, 'This meetup is already full.');
+            await ctx.render({ view: 'meetups/detailPage', status: 400 });
+            return;
+        }
+
+        const session = await ctx.session();
+        const participantsModel = ctx.models.meetupParticipants as MeetupParticipants;
+        participantsModel.joinMeetup(meetupId, session.userId);
+        await ctx.redirectTo(`/meetups/${meetupId}`);
+    }
+
+    async leaveAction(ctx: MojoContext): Promise<void> {
+        const meetupId = Number(ctx.stash.id);
+        const detail = await this.getDetailContext(ctx, meetupId);
+        if (!detail) {
+            await ctx.render({ status: 404, text: 'Meetup not found.' });
+            return;
+        }
+
+        if (detail.isOwner) {
+            this.stashDetail(ctx, detail, 'Organizers cannot leave their own meetup from this screen.');
+            await ctx.render({ view: 'meetups/detailPage', status: 400 });
+            return;
+        }
+
+        if (!detail.isParticipant) {
+            this.stashDetail(ctx, detail, 'You are not part of this meetup yet.');
+            await ctx.render({ view: 'meetups/detailPage', status: 400 });
+            return;
+        }
+
+        const session = await ctx.session();
+        const participantsModel = ctx.models.meetupParticipants as MeetupParticipants;
+        participantsModel.leaveMeetup(meetupId, session.userId);
+        await ctx.redirectTo(`/meetups/${meetupId}`);
     }
 
     async create(ctx: MojoContext): Promise<void> {
@@ -159,5 +225,49 @@ export default class Controller {
         } catch {
             return false;
         }
+    }
+
+    private async getDetailContext(ctx: MojoContext, meetupId: number): Promise<DetailContext | null> {
+        const meetupsModel = ctx.models.meetups as Meetups;
+        const participantsModel = ctx.models.meetupParticipants as MeetupParticipants;
+        const usersModel = ctx.models.users as Users;
+        const meetup = meetupsModel.meetupWithId(meetupId);
+
+        if (!meetup) {
+            return null;
+        }
+
+        const session = await ctx.session();
+        const participants = participantsModel.listParticipantsForMeetup(meetupId);
+        const participantCount = participants.length;
+        const reservedOrganizerSeat = 1;
+        const spotsLeft = Math.max(meetup.totalSeats - reservedOrganizerSeat - participantCount, 0);
+        const organizer = usersModel.userWithId(Number(meetup.organizerUserId));
+        const isOwner = meetup.organizerUserId === session.userId;
+        const isParticipant = participantsModel.isParticipant(meetupId, session.userId);
+
+        return {
+            meetup,
+            organizerName: organizer?.profileName ?? 'Unknown organizer',
+            participants,
+            participantCount,
+            spotsLeft,
+            isOwner,
+            isParticipant,
+            canJoin: !isOwner && !isParticipant && spotsLeft > 0
+        };
+    }
+
+    private stashDetail(ctx: MojoContext, detail: DetailContext, errorMessage?: string): void {
+        ctx.stash.title = detail.meetup.restaurantName;
+        ctx.stash.meetup = detail.meetup;
+        ctx.stash.organizerName = detail.organizerName;
+        ctx.stash.participants = detail.participants;
+        ctx.stash.participantCount = detail.participantCount;
+        ctx.stash.spotsLeft = detail.spotsLeft;
+        ctx.stash.isOwner = detail.isOwner;
+        ctx.stash.isParticipant = detail.isParticipant;
+        ctx.stash.canJoin = detail.canJoin;
+        ctx.stash.errorMessage = errorMessage;
     }
 }

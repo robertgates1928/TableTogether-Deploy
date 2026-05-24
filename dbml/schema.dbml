@@ -26,5 +26,14 @@ Table meetups {
     created_at TEXT [NOT NULL]
 }
 
+Table meetup_participants {
+    meetup_participant_id INTEGER [primary key]
+    meetup_id INTEGER [NOT NULL]
+    user_id INTEGER [NOT NULL]
+    joined_at TEXT [NOT NULL]
+}
+
 ref: uploads.user_id > users.user_id
 ref: meetups.organizer_user_id > users.user_id
+ref: meetup_participants.meetup_id > meetups.meetup_id
+ref: meetup_participants.user_id > users.user_id

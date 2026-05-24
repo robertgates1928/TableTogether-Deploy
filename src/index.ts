@@ -4,6 +4,7 @@ import Database from "better-sqlite3";
 import { Users } from './models/users.js';
 import { Uploads } from './models/uploads.js';
 import { Meetups } from './models/meetups.js';
+import { MeetupParticipants } from './models/meetupParticipants.js';
 
 import fs from 'fs';
 import path from 'node:path';
@@ -24,6 +25,7 @@ const db = new Database(app.config.database)
 app.models.users = new Users(db);
 app.models.uploads = new Uploads(db);
 app.models.meetups = new Meetups(db);
+app.models.meetupParticipants = new MeetupParticipants(db);
 
 // Auth hook — redirect unauthenticated users to /login
 // Skip the login page and static assets served from public/ (file extension but not a routed path)
@@ -51,6 +53,8 @@ app.get('/').to('home#index');
 app.get('/meetups/new').to('meetups#newPage');
 app.post('/meetups').to('meetups#create');
 app.get('/meetups/:id').to('meetups#detailPage');
+app.post('/meetups/:id/join').to('meetups#joinAction');
+app.post('/meetups/:id/leave').to('meetups#leaveAction');
 
 // Serve uploaded files from the uploads/ directory
 // Use # (relaxed placeholder) so filenames with dots are matched
