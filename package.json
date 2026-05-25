@@ -27,6 +27,7 @@
     "dev": "nodemon",
     "test": "tap --disable-coverage --allow-empty-coverage test/*.js test/*.ts",
     "seed": "npm run build && node lib/seed.js",
+    "seed:reset": "npm run build && node lib/seed.js --reset",
     "lint": "npm-run-all --continue-on-error lint:ts lint:css",
     "lint:fix": "npm-run-all --continue-on-error lint:ts:fix lint:css:fix",
     "lint:ts": "eslint",

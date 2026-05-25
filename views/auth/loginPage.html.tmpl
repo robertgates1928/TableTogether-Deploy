@@ -1,35 +1,64 @@
 % view.layout = 'default';
 % ctx.stash.title = "Login"
-<h2>Choose a Test User</h2>
+<section class="login-shell">
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">TableTogether</p>
+            <h2>Sign in to the restaurant meetup hub</h2>
+            <p>
+                Pick an existing profile or create a new one. The app keeps you signed in with an essential session cookie so you can create, join, and leave meetups.
+            </p>
+        </div>
+    </section>
 
+    <section class="login-grid">
+        <section class="panel" aria-labelledby="existing-users-title">
+            <div class="panel-header">
+                <p class="eyebrow">Existing Profiles</p>
+                <h3 id="existing-users-title">Continue with a saved profile</h3>
+                <p class="supporting-text">
+                    Seeded demo users appear here after `npm run seed` or `npm run seed:reset`.
+                </p>
+            </div>
 
+            <% if (users.length > 0) { %>
+                <form class="stack-form" method="post" action="/login">
+                    <input type="hidden" name="action" value="select">
+                    <fieldset class="choice-group">
+                        <legend class="visually-hidden">Existing users</legend>
+                        <% for (const user of users) { %>
+                            <label class="radio-card">
+                                <input type="radio" name="userId" value="<%= user.id %>" required>
+                                <span><%= user.profileName %></span>
+                            </label>
+                        <% } %>
+                    </fieldset>
+                    <button class="button button-primary" type="submit">Continue</button>
+                </form>
+            <% } else { %>
+                <div class="empty-state">
+                    <p class="empty-state-title">No saved profiles yet.</p>
+                    <p>Create one below or run the seed script to preload demo accounts.</p>
+                </div>
+            <% } %>
+        </section>
 
-<% if (users.length > 0) { %>
-<form method="post" action="/login">
-    <input type="hidden" name="action" value="select">
-    <fieldset>
-        <legend>Existing Users</legend>
-        <% for (const user of users) { %>
-        <label>
-            <input type="radio" name="userId" value="<%= user.id %>" required>
-            <%= user.profileName %>
-        </label><br>
-        <% } %>
-        <button type="submit">Login</button>
-    </fieldset>
-</form>
-<% } else { %>
-<p>No users yet. Create one below to get started.</p>
-<% } %>
-
-<form method="post" action="/login">
-    <input type="hidden" name="action" value="create">
-    <fieldset>
-        <legend>Create New User</legend>
-        <label>
-            Profile Name:
-            <input type="text" name="profileName" required>
-        </label>
-        <button type="submit">Create &amp; Login</button>
-    </fieldset>
-</form>
+        <section class="panel panel-accent" aria-labelledby="new-user-title">
+            <div class="panel-header">
+                <p class="eyebrow">New Profile</p>
+                <h3 id="new-user-title">Create a profile for this session</h3>
+                <p class="supporting-text">
+                    Use a simple display name. Do not include phone numbers, private addresses, or other sensitive data.
+                </p>
+            </div>
+            <form class="stack-form" method="post" action="/login">
+                <input type="hidden" name="action" value="create">
+                <label class="field">
+                    <span>Profile name</span>
+                    <input type="text" name="profileName" maxlength="30" required>
+                </label>
+                <button class="button button-primary" type="submit">Create profile</button>
+            </form>
+        </section>
+    </section>
+</section>

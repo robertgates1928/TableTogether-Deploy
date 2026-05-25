@@ -17,7 +17,10 @@ t.test('Auth flow', async t => {
 
   // Step 2: The login page renders and is publicly accessible
   await t.test('Login page is accessible', async () => {
-    (await ua.getOk('/login')).statusIs(200).bodyLike(/Choose a Test User/);
+    (await ua.getOk('/login'))
+      .statusIs(200)
+      .bodyLike(/Sign in to the restaurant meetup hub/)
+      .bodyLike(/Create a profile for this session/);
   });
 
   // Step 3: Create a new user and log in via the form
