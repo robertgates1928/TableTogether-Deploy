@@ -99,3 +99,21 @@
         </div>
     </form>
 </section>
+
+<script>
+    document.querySelectorAll('input, select, textarea').forEach(field => {
+        field.addEventListener('invalid', function(e) {
+            if (e.target.validity.valueMissing) {
+                e.target.setCustomValidity('Please fill out this field.');
+            } else if (e.target.validity.typeMismatch && e.target.type === 'url') {
+                e.target.setCustomValidity('Please enter a valid URL.');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+
+        field.addEventListener('input', function(e) {
+            e.target.setCustomValidity('');
+        });
+    });
+</script>

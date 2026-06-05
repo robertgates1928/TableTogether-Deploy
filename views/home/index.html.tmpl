@@ -40,7 +40,7 @@
             Filters are optional and rely on self-declared information. They help reduce surprises, but they do not verify identity or compatibility.
         </p>
     </div>
-    <form class="filter-form" method="get" action="/">
+    <form class="filter-form" method="get" action="/" hx-get="/" hx-target="#meetup-feed" hx-select="#meetup-feed" hx-swap="outerHTML">
         <div class="filter-grid">
             <label class="field">
                 <span>Payment mode</span>
@@ -96,7 +96,7 @@
     </ul>
 </section>
 
-<section class="panel" aria-labelledby="meetups-title">
+<section class="panel" id="meetup-feed" aria-labelledby="meetups-title">
     <div class="panel-header">
         <p class="eyebrow">Community Feed</p>
         <h3 id="meetups-title">Current meetups</h3>
